@@ -70,8 +70,7 @@ brew install sevenzip
 brew install parallel
 ```
 
-
-then type make at the root level, this should build all necessary custom programs
+then type ```make``` at the root level, this should build all necessary custom programs
 
 The first program we will run is ```bin/check_all``` that checks for presence of 3960 processed TIFFs in ZippedTiffs
 and outputs a list of commands to obtain them if not.
