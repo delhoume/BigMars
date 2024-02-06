@@ -109,5 +109,12 @@ This should be N times faster. Same for 7zz extraction.
 You should at this moment have 3960 smaller TIFFs in ZippedTiffs, in a format suitable for the next step.
 They take about 5.5 To of disk space.
 
+If you want to view the ZippedTiffs, you will have to convert them to  tiled format  that Vliv (Windows only) can open.
+As is it is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
+
+```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
+open center.tif in Vliv you can pan as you whish in this already large image. Celebrate !
+
+Next step will see us generate images 90 times larger and from 2 to 44  times higher...
 
 
