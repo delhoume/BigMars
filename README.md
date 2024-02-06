@@ -22,16 +22,17 @@ This requires about 8 terabytes of disk space, I bought a 12To WD MyBook to stor
 
 I use a 2020 Mac Mini M1, but source code and scripts can be easily adapted or compiled for Windows and Linux.
 
-scripts/download_all.sh will download all, thanks to their HTTP server supporting Accept-Ranges.
+```scripts/download_all.sh``` will download all, thanks to their HTTP server supporting ```Accept-Ranges```.
 You can stop at any moment and downloading will resume when you relaunch it.
 The download is split in 4 parts because I did not find how to create a single cUrl command for the files pattern.
 
 Files are named using longitudes from -180 to 176  and latitudes from -88 to 84 in 4 increment
 
+```
 >curl -C -   "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E[000-176:4]_N[00-84:4].zip" -O
 >curl -C -   "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E[000-176:4]_N-[04-88:4].zip" -O
 >curl -C -   "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E-[004-180:4]_N[00-84:4].zip" -O
 >curl -C -   "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E-[004-180:4]_N-[04-88:4].zip" -O
-
+```
 
 After a while, depending on your Internet connection speed, you should have the 3960 files. It took me about one month.
