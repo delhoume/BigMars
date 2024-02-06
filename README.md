@@ -17,6 +17,8 @@ A single pixel covers about 5 meters.
 
 They are available at https://murray-lab.caltech.edu/CTX/V01/tiles/ 
 
+Step 1
+  
 The first step towards the final image is to download the 3960 zip files.
 This requires about 8 terabytes of disk space, I bought a 12To WD MyBook to store them.
 
@@ -36,3 +38,75 @@ Files are named using longitudes from -180 to 176  and latitudes from -88 to 84 
 ```
 
 After a while, depending on your Internet connection speed, you should have the 3960 files. It took me about one month.
+
+Step 2 (extract TIFF files) 
+
+Each ZIP file contains a 47420 x 47420 uncompressed 1 byte per pixel TIFF image that weights 2254080140 bytes.
+
+So once decompressed the total would be enormous at 80 To, not counting the ZIP files..
+Keeping these files uncompressed makes no sense unless you have a lot of disk space.
+So I have a command that will decompress the ZIP them one by one, create a Deflate compressed TIFF in another folder and once done,
+delete the uncompressed temporary file.
+
+The root folder for this project is BigMars
+
+I keep the ZIPs in an OriginalData folder, an OriginalTiffs and a ZippedTiffs folder.
+Sources are in src, compiled binaries in bin.
+
+Dependencies can be installed with the brew command (https://brew.sh/).
+
+You will need 
+```
+brew install gcc 
+brew install libtiff
+brew install jpeg-turbo
+brew install zlib-ng
+brew install zstd
+brew install lzma
+brew install curl
+brew install sevenzip
+brew install parallel
+```
+
+
+then type make at the root level, this should build all necessary custom programs
+
+The first program we will run is ```bin/check_all``` that checks for presence of 3960 processed TIFFs in ZippedTiffs
+and outputs a list of commands to obtain them if not.
+
+Typical output is
+```
+ZippedTiffs/MurrayLab_CTX_V01_E000_N00_Mosaic.tif  (1935 / 3960) missing
+cd OriginalData
+curl -C - "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E000_N00.zip" -O
+cd ..
+7zz e OriginalData/MurrayLab_GlobalCTXMosaic_V01_E000_N00.zip -oOriginalTiffs "*.tif" -r -aos
+tiffcp -s -r 1 -c zip:p9 OriginalTiffs/MurrayLab_CTX_V01_E000_N00_Mosaic.tif ZippedTiffs/MurrayLab_CTX_V01_E000_N00_Mosaic.tif
+rm -rf OriginalTiffs/MurrayLab_CTX_V01_E000_N00_Mosaic.tif
+...
+```
+```bin/check_all > process.sh```
+
+Note that TIFF files have a slightly different naming than ZIP files.
+
+Depending on your available disk space you might want to comment the ```rm```command lines.
+Or ad an rm for OriginalData  once ZippedTiffs are done.
+You may also change the ```curl``` or the ```7zz``` parts if you keep all files.
+
+Launch the ```process.sh``` script using ```source process.sh```
+
+Processing all 3960 source files can take a considerable amount of times (in days).
+
+You can speed up parts of this process leveraging modern multicore processors with the
+```parallel```command.
+For exemple, if you have extracted all TIFFs on OriginalTiffs folder you may convert them to Deflate using
+
+```ls -a OriginalTiffs/*.tif | parallel tiffcp -s -r 1 -c zip:p9 {} ZippedTiffs/{/}```
+
+This should be N times faster. Same for 7zz extraction.
+
+You should at this moment have 3960 smaller TIFFs in ZippedTiffs, in a format suitable for the next step.
+They take about 5.5 To of disk space.
+
+
+
