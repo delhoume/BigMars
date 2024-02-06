@@ -44,13 +44,15 @@ Step 2 (extract TIFF files)
 Each ZIP file contains a 47420 x 47420 uncompressed 1 byte per pixel TIFF image that weights 2254080140 bytes.
 
 So once decompressed the total would be enormous at 80 To, not counting the ZIP files..
+
 Keeping these files uncompressed makes no sense unless you have a lot of disk space.
-So I have a command that will decompress the ZIP them one by one, create a Deflate compressed TIFF in another folder and once done,
+
+So I have a command that will decompress the ZIP one by one, create a Deflate compressed TIFF in another folder and once done,
 delete the uncompressed temporary file.
 
 The root folder for this project is BigMars
 
-I keep the ZIPs in an OriginalData folder, an OriginalTiffs and a ZippedTiffs folder.
+I keep the downloaded ZIPs in OriginalData folder, extracted uncomressed TIFFSs in OriginalTiffs and compressed TIFFs in ZippedTiffs.
 Sources are in src, compiled binaries in bin.
 
 Dependencies can be installed with the brew command (https://brew.sh/).
