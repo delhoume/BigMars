@@ -91,7 +91,7 @@ rm -rf OriginalTiffs/MurrayLab_CTX_V01_E000_N00_Mosaic.tif
 Note that TIFF files have a slightly different naming than ZIP files.
 
 Depending on your available disk space you might want to comment the ```rm```command lines.
-Or ad an rm for OriginalData  once ZippedTiffs are done.
+Or add an ```rm``` for OriginalData  once ZippedTiffs are done.
 You may also change the ```curl``` or the ```7zz``` parts if you keep all files.
 
 Launch the ```process.sh``` script using ```source process.sh```
@@ -113,7 +113,8 @@ If you want to view the ZippedTiffs, you will have to convert them to  tiled for
 As is it is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
 
 ```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
-open center.tif in Vliv you can pan as you whish in this already large image. Celebrate !
+open center.tif in Vliv you can pan as you want very smoothly in this already large image. Celebrate !
+It is expected you cannot zoom out yet...
 
 Next step will see us generate images 90 times larger and from 2 to 44  times higher...
 
