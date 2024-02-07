@@ -111,7 +111,7 @@ It is still possible to open them using normal viewers but it might be slow and 
 
 ```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
 
-open center.tif in Vliv you can pan as you want very smoothly in this already large image. **Celebrate !**
+**open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
 
 Next step will see us generate images 90 times larger and from 2 to 44  times higher...
