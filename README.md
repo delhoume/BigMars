@@ -1,8 +1,8 @@
-This project is a guide for creating an single TIFF file and a Deep Zoom structure that will allow viewing interactively
-a gigantic (42678000 x 2086480 pixels, that's a lot, at 8.9 terapixels).
+This project is a guide for creating a **single TIFF file** and a Deep Zoom structure that will allow viewing interactively
+a gigantic (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) imaage of Mars surface.
 
 The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
-to be able to view, zoom unzoom pan the full image.
+to be able to view (zoom, unzoom, pan).
 
 This specially crafted pyramidal tiled TIFF can be opened with my Open Source software for Windows https://github.com/delhoume/vliv .
 The generated Deep Zoom structure can be served using any HTTP server and visualized with a browser thanks to the OpenSeaDragon project :
@@ -11,13 +11,13 @@ https://openseadragon.github.io/
 The source for the data is https://murray-lab.caltech.edu/CTX/index.html
 
 Data is available as one file for a part of the surface that covers 4 square degree, a ZIP file containing geo localization, general information and data.
-There are 90 x 44 of them for a total of 3960 files.
-We will only use the TIFF that holds pixel data (greyscale 1 byte / per pixel), has a 47420x47420 pixel size, and is uncompressed.
+There are 90 x 44 of them for a total of **3960** files.
+We will only use the TIFF that holds pixel data (greyscale 1 byte / per pixel), holds **47420x47420 pixels, and is uncompressed.
 A single pixel covers about 5 meters.
 
 They are available at https://murray-lab.caltech.edu/CTX/V01/tiles/ 
 
-Step 1
+## Step 1 Downloading the source data
   
 The first step towards the final image is to download the 3960 zip files.
 This requires about 8 terabytes of disk space, I bought a 12To WD MyBook to store them.
@@ -39,9 +39,9 @@ Files are named using longitudes from -180 to 176  and latitudes from -88 to 84 
 
 After a while, depending on your Internet connection speed, you should have the 3960 files. It took me about one month.
 
-Step 2 (extract TIFF files) 
+## Step 2 Preparing the data 
 
-Each ZIP file contains a 47420 x 47420 uncompressed 1 byte per pixel TIFF image that weights 2254080140 bytes.
+Each ZIP file contains a 47420x47420 uncompressed 1 byte per pixel TIFF image that weights **2254080140** bytes.
 
 So once decompressed the total would be enormous at 80 To, not counting the ZIP files..
 
@@ -50,30 +50,27 @@ Keeping these files uncompressed makes no sense unless you have a lot of disk sp
 So I have a command that will decompress the ZIP one by one, create a Deflate compressed TIFF in another folder and once done,
 delete the uncompressed temporary file.
 
-The root folder for this project is BigMars
+The root folder for this project is ```BigMars```
 
-I keep the downloaded ZIPs in OriginalData folder, extracted uncomressed TIFFSs in OriginalTiffs and compressed TIFFs in ZippedTiffs.
+I keep the downloaded ZIPs in ```OriginalData```, extracted uncompressed TIFFSs in ```OriginalTiffs``` and compressed TIFFs in ```ZippedTiffs```.
 Sources are in src, compiled binaries in bin.
 
-Dependencies can be installed with the brew command (https://brew.sh/).
+Dependencies can be installed with the ```brew``` command (https://brew.sh/).
+In a terminal (I recommend **iTerm**), in the BigMars clone repository folder, type:
 
-You will need 
-```
-brew install gcc 
-brew install libtiff
-brew install jpeg-turbo
-brew install zlib-ng
-brew install zstd
-brew install lzma
-brew install curl
-brew install sevenzip
-brew install parallel
-```
+```brew install gcc libtiff jpeg-turbo zlib-ng zstd lzma curl sevenzip parallel```
 
-then type ```make``` at the root level, this should build all necessary custom programs
+once all is installed
 
-The first program we will run is ```bin/check_all``` that checks for presence of 3960 processed TIFFs in ZippedTiffs
-and outputs a list of commands to obtain them if not.
+```make```
+
+this should build all necessary custom programs
+
+The first program we will run is 
+
+```bin/check_all``` 
+
+that checks for presence of 3960 processed TIFFs in ZippedTiffs and outputs a list of commands to obtain them if not.
 
 Typical output is
 ```
@@ -110,10 +107,11 @@ You should at this moment have 3960 smaller TIFFs in ZippedTiffs, in a format su
 They take about 5.5 To of disk space.
 
 If you want to view the ZippedTiffs, you will have to convert them to  tiled format  that Vliv (Windows only) can open.
-As is it is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
+It is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
 
 ```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
-open center.tif in Vliv you can pan as you want very smoothly in this already large image. Celebrate !
+
+open center.tif in Vliv you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
 
 Next step will see us generate images 90 times larger and from 2 to 44  times higher...
