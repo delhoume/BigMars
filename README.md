@@ -123,7 +123,7 @@ When you deal with such large images (or data) you have to mitigate the fact tha
 While it is possible to write code that generates a tiled TIFF directly from the TIFFs generated at step 2, my strategy is to generate first a 
 one pixel per strip full image, then convert it to tiled.
 The command ```bin/buildmarsimage <cols> <rows>``` will generate a ```mars_full_rgb_strip.tif``` given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimage 10 10```  that will generate a 474200x474200 TIFF (in about 2 hours on my machine).
+ you can start with a modest ```bin/buildmarsimage 10 10```  that will generate a 474200x474200 TIFF (in about 3 to 4  hours on my machine).
 
  As for the single tile TIFFS, you will have to convert it to tiled format to display with Vliv.
 ```bin/strip2tiled.jpg mars_full_rgb_strip.tif mars_full_rgb_tiled.tif```
@@ -158,15 +158,15 @@ The final pyramidal TIFF should weight no more than **1.33 times the full size i
 Once this is done, you may want to build the real deal, the full Mars surface image with
 ```bin/buildmarsimage 90 44```
 
-I have yet to finish a complete build, so far it runs for 3 days and estimated remaining time is 2 days.
-Final running is notoriously hard to predict (just think about a Windows copy dialog with a large number of various sized files,
+I have yet to finish a complete build, so far it is running for 3 days and estimated remaining time is 2 days.
+Final running  time is notoriously hard to predict (just think about a Windows copy dialog with a large number of various sized files,
 the estimation for completion can vary very much).
 I display 2 estimates, one that, given the number of completed rows since the start, computes an average per row time and applys it to remaining rows, the other
 based on instant row performance if sustained for the remaining rows.
 Depending on your machine load, disk drives speed, memory, they can differ much but should converge at the very end...
 
 Once you have the full 90x44 ```mars_full_rgb_strip.tif``` you follow the same process than for the 10x10 one, converting to tile, generating sublevels, merging.
-Processing time will be significantly higher...
+Processing time will be significantly higher as the full image is about 40 times larger...
 
 The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 6 Terabytes on disk,
  and yet **can be instalty opened in Vliv**
