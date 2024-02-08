@@ -108,6 +108,7 @@ They take about 5.5 To of disk space.
 
 If you want to view the ZippedTiffs, you will have to convert them to  tiled format  that Vliv (Windows only) can open.
 It is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
+Vliv can load-on-demand strips as well as tiles TIFFs, but in this case strips are very large and it is not optimal at all.
 
 ```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
 
@@ -129,7 +130,7 @@ The command ```bin/buildmarsimage <cols> <rows>``` will generate a ```mars_full_
 ```bin/strip2tiled.jpg mars_full_rgb_strip.tif mars_full_rgb_tiled.tif```
 
 In order to zoom and unzoom in this very large image without loading it into memory, we will create a so called pyramid, that is successive
-images with half width and height from previous one, until you reach a screen viewable size.
+images with half width and height from previous one, until you reach a screen viewable size (or a 1x1 pixel image).
 Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory (5 times a single tile).
 
 ```
