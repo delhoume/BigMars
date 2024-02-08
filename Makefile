@@ -11,7 +11,7 @@ THREADS=8
 LIBS = /opt/homebrew/lib/libtiff.a  /opt/homebrew/lib/libturbojpeg.a \
     /opt/homebrew/lib/libz-ng.a /opt/homebrew/lib/libzlibstatic.a /opt/homebrew/lib/libzstd.a /opt/homebrew/lib/liblzma.a  -l gomp
 
-PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.jpg $(BINDIR)/tiffmerge.first
+PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg $(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom
 
 all: $(PROGRAMS)
 
@@ -32,5 +32,11 @@ $(BINDIR)/halftiff_stb: $(SRCDIR)/halftiff_stb.cpp
 $(BINDIR)/strip2tiled.jpg: $(SRCDIR)/strip2tiled.cpp
 	$(CCC) $(CCFLAGS) -DNTHREADS=$(THREADS) -DUSE_JPEG $(SRCDIR)/strip2tiled.cpp -o $(BINDIR)/strip2tiled.jpg  $(LIBS)
 
+$(BINDIR)/strip2tiled.zip: $(SRCDIR)/strip2tiled.cpp
+	$(CCC) $(CCFLAGS) -DNTHREADS=$(THREADS) $(SRCDIR)/strip2tiled.cpp -o $(BINDIR)/strip2tiled.zip  $(LIBS)
+
 $(BINDIR)/tiffmerge.first: $(SRCDIR)/tiffmerge.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/tiffmerge.cpp -o $(BINDIR)/tiffmerge.first $(LIBS)
+
+$(BINDIR)/pyramid2deepzoom: $(SRCDIR)/pyramid2deepzoom.cpp
+	$(CCC) $(CCFLAGS) $(SRCDIR)/pyramid2deepzoom.cpp -o $(BINDIR)/pyramid2deepzoom $(LIBS)
