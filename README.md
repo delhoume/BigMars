@@ -114,9 +114,9 @@ It is still possible to open them using normal viewers but it might be slow and 
 **open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
 
-Next step will see us generate images 90 times larger and from 2 to 44  times higher...
+Next step swill see us generate images 90 times larger and from 2 to 44  times higher...
 
-## Step 4 Building the full image as a one pixel per strip TIFF
+## Step 3 Building a 474200x474200 pyramidal image
 
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load it in memory (by far).
 
@@ -151,6 +151,8 @@ It can be opened in Vliv and you can navigate through levels using the mouse whe
 for panning and (un)zooming.
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
 
+## Step 4 Building a the full multi-terapixel pyramidal image of Mars surface
+
 Once this is done, you may want to build the real deal, the full Mars surface image with
 ```bin/buildmarsimage 90 44```
 
@@ -162,12 +164,16 @@ based on instant row performance if sustained for the remaining rows.
 Depending on your machine load, disk drives speed, memory, they can differ much but should converge at the very end...
 
 Once you have the full 90x44 ```mars_full_rgb_strip.tif``` you follow the same process than for the 10x10 one, converting to tile, generating sublevels, merging.
+Processing time will be significantly higher...
+
+The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 6 Terabytes on disk,
+ and yet **can be instalty opened in Vliv**
 
 **Please notify me if you got this far !**
 
 
 You can tweak the programs to change compression type or level, or whatever you can think of.
-You cannot for example have JPEG compressed strip TIFF with less than 8 ros per strip, and limit for JPEG is well below the width of the full Mars image
+You cannot for example have JPEG compressed strip TIFF with less than 8 rows per strip, and limit for JPEG is well below the width of the full Mars image
 (JPEG limits are 65535x65535 I think).
 Given the enormous amount of data, (de)compression levels can have a significant impact on processing time.
 I switch to JPEG TIFFs for tiled ones, giving a good peformance and much reduced disk usage than Deflate ones).
