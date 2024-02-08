@@ -12,7 +12,7 @@ The source for the data is https://murray-lab.caltech.edu/CTX/index.html
 
 Data is available as one file for a part of the surface that covers 4 square degree, a ZIP file containing geo localization, general information and data.
 There are 90 x 44 of them for a total of **3960** files.
-We will only use the TIFF that holds pixel data (greyscale 1 byte / per pixel), holds **47420x47420 pixels, and is uncompressed.
+We will only use the TIFF that holds pixel data (greyscale 1 byte per pixel), holds **47420x47420 pixels**, and is uncompressed.
 A single pixel covers about 5 meters.
 
 They are available at https://murray-lab.caltech.edu/CTX/V01/tiles/ 
@@ -165,7 +165,7 @@ I display 2 estimates, one that, given the number of completed rows since the st
 based on instant row performance if sustained for the remaining rows.
 Depending on your machine load, disk drives speed, memory, they can differ much but should converge at the very end...
 
-Once you have the full 90x44 ```mars_full_rgb_strip.tif``` you follow the same process than for the 10x10 one, converting to tile, generating sublevels, merging.
+Once you have the full 90x44 ```mars_full_rgb_strip.tif``` you follow the same process than for the 10x10 one, converting to tiled, generating sublevels, merging.
 Processing time will be significantly higher as the full image is about 40 times larger...
 
 The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 6 Terabytes on disk,
@@ -178,7 +178,7 @@ You can tweak the programs to change compression type or level, or whatever you 
 You cannot for example have JPEG compressed strip TIFF with less than 8 rows per strip, and limit for JPEG is well below the width of the full Mars image
 (JPEG limits are 65535x65535 I think).
 Given the enormous amount of data, (de)compression levels can have a significant impact on processing time.
-I switch to JPEG TIFFs for tiled ones, giving a good peformance and much reduced disk usage than Deflate ones).
+I switch to JPEG TIFFs for tiled ones, giving a good peformance and much reduced disk usage than Deflate ones.
 
 In the next step, we will see how to create a Deep Zoom layout, that will allow interactive (and impressive) visualization with a simple
 Web browser
