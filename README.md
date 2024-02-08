@@ -146,7 +146,9 @@ bin/hafltiff_stb 7.tif 8.tif
 The last image should be 900x900 pixels, all intermediate levels TIFFs can be opened in Vliv.
 
 The final step is to assemble all levels into a single TIFF:
-```bin/tiffmerge mars_full_rgb_tiled.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_10x10.tif
+
+```bin/tiffmerge mars_full_rgb_tiled.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_10x10.tif```
+
 It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of zoom. Note also that Vliv supports a joystick
 for panning and (un)zooming.
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
