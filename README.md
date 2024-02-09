@@ -153,8 +153,12 @@ The final step is to assemble all levels into a single TIFF:
 
 ```bin/tiffmerge.first 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_fourbyfour.tif```
 
+![Vliv displaying various regions and zooms for mars_final_fourbyfour.tif ](images/montage.png)
+
 It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of zoom. Note also that Vliv supports a joystick
 for panning and (un)zooming.
+
+
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
 
 ## Step 4 Building a the full multi-terapixel pyramidal image of Mars surface
