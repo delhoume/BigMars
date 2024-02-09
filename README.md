@@ -125,9 +125,10 @@ While it is possible to write code that generates a tiled TIFF directly from the
 one pixel per strip full image, then convert it to tiled.
 The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a moisaic given a number of rows and columns.
  you can start with a modest ```bin/buildmarsimage fourbyfour.tif 4 4```  that will only take less than one hour.
+ The image is always centered around E000 and N00 because imagery is much nicer than on borders, espacially at poles.
 
  You can change the folder where ZippedTiffs is to be found when building the commands.
- See vaiable FOLDER in the Makefile 
+ See variable FOLDER in the Makefile 
 
  As for the single tile TIFFS, you will have to convert it to tiled format to display with Vliv.
 ```bin/strip2tiled.jpg fourbyfour.tif 0.tif```
