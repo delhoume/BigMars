@@ -153,7 +153,7 @@ The final step is to assemble all levels into a single TIFF:
 
 ```bin/tiffmerge.first 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_fourbyfour.tif```
 
-![Vliv displaying various regions and zooms for mars_final_fourbyfour.tif ](images/montage.png)
+![Vliv displaying various regions and zooms for mars_final_fourbyfour.tif ](images/mosaic.png)
 
 It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of zoom. Note also that Vliv supports a joystick
 for panning and (un)zooming.
@@ -177,7 +177,7 @@ Once you have the full 90x44 ```mars_full_rgb_strip.tif``` you follow the same p
 Processing time will be significantly higher as the full image is about 40 times larger...
 
 The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 6 Terabytes on disk,
- and yet **can be instalty opened in Vliv**
+ and yet **can be instantly opened in Vliv**
 
 **Please notify me if you got this far !**
 
