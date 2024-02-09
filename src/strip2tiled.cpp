@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 	cout << "image : " << endl
 		 << "  size: " << imagewidth << " x " << imageheight << endl
 		 << "  sample per pixel: " << samplesperpixel << endl
-		 << "  bit per sample: " << bitspersample << endl;
+		 << "  bits per sample: " << bitspersample << endl;
 
 	TIFFSetField(tifout, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 	TIFFSetField(tifout, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
