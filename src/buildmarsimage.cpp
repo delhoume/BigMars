@@ -194,7 +194,7 @@ std::cout << "Final image  " << outfilename << " will be " << to_string(dstwidth
           std::cout << std::setw(6) << (y + 1) << " / " << dstheight
                     << " # " << std::setw(5) << (h + 1) << " / " << srcheight
                     << " # " << (int)(ppercent * 100) << "%"
-                    << " # abs row " << currow << " - "
+                    << " # abs row N" << currow << " - "
                     << "(" << (r + 1) << "/" << numsrcy << ")"
                     << " # mean speed" << std::setw(4) << (unsigned int)rate << " rows/s"
                     << " # current speed " << std::setw(4) << (unsigned int)(1 / fullSecOneRow) << " rows/s";
