@@ -12,8 +12,8 @@ The source for the data is https://murray-lab.caltech.edu/CTX/index.html
 
 Data is available as one file for a part of the surface that covers 4 square degree, a ZIP file containing geo localization, general information and data.
 There are 90 x 44 of them for a total of **3960** files.
-We will only use the TIFF that holds pixel data (greyscale 1 byte per pixel), holds **47420x47420 pixels**, and is uncompressed.
-A single pixel covers about 5 meters.
+We will only use the TIFF that holds pixel data (greyscale 1 byte per pixel), is **47420x47420 pixels** and uncompressed.
+A single pixel covers about 5 square meters.
 
 They are available at https://murray-lab.caltech.edu/CTX/V01/tiles/ 
 
