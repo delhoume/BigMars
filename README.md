@@ -187,7 +187,7 @@ You can tweak the programs to change compression type or level, or whatever you 
 You cannot for example have JPEG compressed strip TIFF with less than 8 rows per strip, and limit for JPEG is well below the width of the full Mars image
 (JPEG limits are 65535x65535 I think).
 Given the enormous amount of data, (de)compression levels can have a significant impact on processing time.
-I switch to JPEG TIFFs for tiled ones, giving a good peformance and much reduced disk usage than Deflate ones.
+I switch to JPEG TIFFs for tiled ones, giving a good performance and much reduced disk usage than Deflate ones.
 
 In the next step, we will see how to create a Deep Zoom layout, that will allow interactive (and impressive) visualization with a simple
 Web browser
