@@ -130,9 +130,9 @@ The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a moi
  See vaiable FOLDER in the Makefile 
 
  As for the single tile TIFFS, you will have to convert it to tiled format to display with Vliv.
-```bin/strip2tiled.jpg fourbyfour.tif.tif 0.tif```
+```bin/strip2tiled.jpg fourbyfour.tif 0.tif```
 
-In order to zoom and unzoom in this very large image without loading it into memory, we will create a so called pyramid, that is successive
+In order to zoom and unzoom in this very large image without loading it into memory, we will create a so called pyramid, successive
 images with half width and height from previous one, until you reach a screen viewable size (or a 1x1 pixel image).
 Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory (5 times a single tile).
 
@@ -147,11 +147,11 @@ bin/hafltiff_stb 6.tif 7.tif
 bin/hafltiff_stb 7.tif 8.tif
 ```
 
-The last image should be 900x900 pixels, all intermediate levels TIFFs can be opened in Vliv.
+The last image should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
 
 The final step is to assemble all levels into a single TIFF:
 
-```bin/tiffmerge 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_fourbyfour.tif```
+```bin/tiffmerge.first 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_fourbyfour.tif```
 
 It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of zoom. Note also that Vliv supports a joystick
 for panning and (un)zooming.
