@@ -117,24 +117,27 @@ It is expected you cannot zoom out yet...
 
 Next step swill see us generate images 90 times larger and from 2 to 44  times higher...
 
-## Step 3 Building a 474200x474200 pyramidal image
+## Step 3 Building a 189680x189680 pyramidal image
 
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load it in memory (by far).
 
 While it is possible to write code that generates a tiled TIFF directly from the TIFFs generated at step 2, my strategy is to generate first a 
 one pixel per strip full image, then convert it to tiled.
-The command ```bin/buildmarsimage <cols> <rows>``` will generate a ```mars_full_rgb_strip.tif``` given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimage 10 10```  that will generate a 474200x474200 TIFF (in about 3 to 4  hours on my machine).
+The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a moisaic given a number of rows and columns.
+ you can start with a modest ```bin/buildmarsimage fourbyfour.tif 4 4```  that will only take less than one hour.
+
+ You can change the folder where ZippedTiffs is to be found when building the commands.
+ See vaiable FOLDER in the Makefile 
 
  As for the single tile TIFFS, you will have to convert it to tiled format to display with Vliv.
-```bin/strip2tiled.jpg mars_full_rgb_strip.tif mars_full_rgb_tiled.tif```
+```bin/strip2tiled.jpg fourbyfour.tif.tif 0.tif```
 
 In order to zoom and unzoom in this very large image without loading it into memory, we will create a so called pyramid, that is successive
 images with half width and height from previous one, until you reach a screen viewable size (or a 1x1 pixel image).
 Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory (5 times a single tile).
 
 ```
-bin/hafltiff_stb mars_full_rgb_tiled.tif 1.tif
+bin/hafltiff_stb 0.tif 1.tif
 bin/hafltiff_stb 1.tif 2.tif
 bin/hafltiff_stb 2.tif 3.tif
 bin/hafltiff_stb 3.tif 4.tif
@@ -148,7 +151,7 @@ The last image should be 900x900 pixels, all intermediate levels TIFFs can be op
 
 The final step is to assemble all levels into a single TIFF:
 
-```bin/tiffmerge mars_full_rgb_tiled.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_10x10.tif```
+```bin/tiffmerge 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_final_fourbyfour.tif```
 
 It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of zoom. Note also that Vliv supports a joystick
 for panning and (un)zooming.
