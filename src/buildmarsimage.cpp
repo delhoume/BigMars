@@ -20,11 +20,16 @@ extern "C" {
 
 #define Z_MIDDLE_COMPRESSION 6
 
+#if !defined(DEFAULT_FOLDER)
+#define DEFAULT_FOLDER "."
+#endif
+
 static char buff[256];
-const char *getName(int row, int col) {
+const char *getName(int row, int col, const char* folder = DEFAULT_FOLDER) {
   snprintf(buff,
            sizeof(buff),
-           "/Volumes/My Book/BigMars/ZippedTiffs/MurrayLab_CTX_V01_E%s%03d_N%s%02d_Mosaic.tif",
+           "%s/ZippedTiffs/MurrayLab_CTX_V01_E%s%03d_N%s%02d_Mosaic.tif",
+           folder,
            (col < 0 ? "-" : ""), abs(col),
            (row < 0 ? "-" : ""), abs(row));
   return buff;
@@ -46,9 +51,7 @@ void displayDuration(unsigned int seconds, const char *text = 0) {
   std::cout << std::setfill(' ');
 }
 
-bool debug = true;
-
-// Exponentialmoving Average to smooth previsions on ramaining time
+// Exponential moving Average to smooth variations on predicted remaining time
 class Ema
 {
 public:
@@ -77,29 +80,39 @@ private:
   float _alpha = 0; //  Smoothing factor, in range [0,1]. Higher the value - less smoothing (higher the latest reading impact)
 };
 
-int main(int argc, char *argv[]) {
-  if (argc != 3)
-  {
-    std::cout << "Usage: buildmarsimage <cols> <rows>" << std::endl;
+int 
+main(int argc, char *argv[]) {
+    std::cout << "Usage: buildmarsimage <out.tif> <cols> <rows>" << std::endl;
+    std::cout << "       cols 1..90" << std::endl;   
+    std::cout << "       rows 1..44" << std::endl;
+    std::cout << "       no arg mean buildmarsimage mars_strip.tif 90 44" << std::endl;
     std::cout << "       fdelhoume 2024" << std::endl;
-    return 0;
-  }
-  int stepx = 4;
-  int startx = -180;
-  int stepy = -4;
-  int starty = 84;
+
   unsigned int srcwidth = 47420;
   unsigned int srcheight = 47420;
-  unsigned int numsrcx = atoi(argv[1]);
-  unsigned int numsrcy = atoi(argv[2]);
+  const char* outfilename = argc > 1 ? argv[1] : "mars_strip.tif";
+  unsigned int numsrcx = argc > 2 ? atoi(argv[2]) : 90;
+  unsigned int numsrcy = argc > 3 ? atoi(argv[3]) : 44;
+
+  if (numsrcx > 90) numsrcx = 90;
+  if (numsrcx < 1) numsrcx = 1;
+  if (numsrcy > 44) numsrcy = 44;
+  if (numsrcy < 1) numsrcy = 1;
+
+  int stepx = 4;
+  int startx = -4 * (numsrcx / 2); // 4 increment and integers
+  int stepy = -4;
+  int starty = 4 * (numsrcy / 2 - 1); 
+
   unsigned int dstwidth = numsrcx * srcwidth;
   unsigned int dstheight = numsrcy * srcheight;
 
   Ema smoothRemainingSeconds(0.1);
-std::cout << std::fixed << std::setprecision(2);
-std::cout << "Final image will be " << to_string(dstwidth) << "x" << to_string(dstheight) << std::endl;
-  // create dst image
-  TIFF *tifout = TIFFOpen("mars_full_one_strip.tif", "w8");
+std::cout << std::setprecision(2);
+std::cout << "Starting from:  " << to_string(startx) << "  " << to_string(starty) <<  std::endl;
+std::cout << "Final image  " << outfilename << " will be " << to_string(dstwidth) << "x" << to_string(dstheight) << std::endl;
+  // create dst image, open as BigTIFF (obviously)
+  TIFF *tifout = TIFFOpen(outfilename, "w8");
   TIFFSetField(tifout, TIFFTAG_IMAGEWIDTH, dstwidth);
   TIFFSetField(tifout, TIFFTAG_IMAGELENGTH, dstheight);
 
@@ -131,14 +144,13 @@ std::cout << "Final image will be " << to_string(dstwidth) << "x" << to_string(d
     int curcol = startx;
     for (unsigned int c = 0; c < numsrcx; ++c, curcol += stepx) {
       const char *name = getName(currow, curcol);
-      FILE *f = fopen(name, "r");
-      if (f)
-        tifrow[c] = TIFFOpen(name, "r");
-      fclose(f);
+      std::cout << "Loading " << name << std::endl;
+      tifrow[c] = TIFFOpen(name, "r");
       if (tifrow[c] == 0) {
         std::cout << "Tile " << name << "not found" << std::endl;
       }
     }
+      std::cout << "Computing row " << (r + 1) << " / " << numsrcy << endl;;
       // write one row
       for (unsigned int h = 0; h < srcheight; ++h, ++y) {
         // for all cols
@@ -152,6 +164,7 @@ std::cout << "Final image will be " << to_string(dstwidth) << "x" << to_string(d
           if (tifrow[col]) {
             tsize_t rb = TIFFReadEncodedStrip(tifrow[col], h, posindst, srcwidth);
             if (rb == -1) {
+              // not very compatible width Open MP...
               std::cout << "error for " << getName(currow, curcol) << endl;
             } else if (rb > srcwidth) {
               std::cout << "read bytes " << rb << " and buffer size " << srcwidth << " differ " << std::endl;
@@ -181,12 +194,12 @@ std::cout << "Final image will be " << to_string(dstwidth) << "x" << to_string(d
           std::cout << std::setw(6) << (y + 1) << " / " << dstheight
                     << " # " << std::setw(5) << (h + 1) << " / " << srcheight
                     << " # " << (int)(ppercent * 100) << "%"
-                    << " # " << currow << " - "
-                    << "(" << r << "/" << numsrcy << ")"
+                    << " # abs row " << (currow + 1) << " - "
+                    << "(" << (r + 1) << "/" << numsrcy << ")"
                     << " # mean speed" << std::setw(4) << (unsigned int)rate << " rows/s"
-                    << " # current speed: " << std::setw(4) << (unsigned int)(1 / fullSecOneRow) << " rows/s";
-          std::cout << " # read:  " << std::setw(3) << (unsigned int)differenceOneRowRead << "ms"
-                    << " # write: " << std::setw(3) << (unsigned int)differenceOneRowWrite << "ms";
+                    << " # current speed " << std::setw(4) << (unsigned int)(1 / fullSecOneRow) << " rows/s";
+          std::cout << " # R/W  " << std::setw(3) << (unsigned int)differenceOneRowRead 
+               << "/" << std::setw(3) << (unsigned int)differenceOneRowWrite << "ms";
           displayDuration(differenceFromStart, "# elapsed: ");
           displayDuration(remainingSecs, " # end in (elapsed): ");
           displayDuration(remainingFromCurrentPerf, " # end in (perf): ");
@@ -199,6 +212,7 @@ std::cout << "Final image will be " << to_string(dstwidth) << "x" << to_string(d
         if (tifrow[c])
           TIFFClose(tifrow[c]);
       }
+      std::cout << std::endl;
     }
     TIFFClose(tifout);
     delete[] tifrow;

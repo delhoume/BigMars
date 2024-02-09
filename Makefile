@@ -5,8 +5,9 @@ CCC=/opt/homebrew/bin/g++-13
 
 CCFLAGS = -std=c++11 -O3 -fopenmp -I /opt/homebrew/include -I src
 
-
 THREADS=8
+
+FOLDER = "/Volumes/My Book/BigMars"
 
 LIBS = /opt/homebrew/lib/libtiff.a  /opt/homebrew/lib/libturbojpeg.a \
     /opt/homebrew/lib/libz-ng.a /opt/homebrew/lib/libzlibstatic.a /opt/homebrew/lib/libzstd.a /opt/homebrew/lib/liblzma.a  -l gomp
@@ -24,7 +25,7 @@ $(BINDIR)/check_all: $(SRCDIR)/check_all.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/check_all.cpp -o $(BINDIR)/check_all $(LIBS)
 
 $(BINDIR)/buildmarsimage: $(SRCDIR)/buildmarsimage.cpp
-	$(CCC) $(CCFLAGS) $(SRCDIR)/buildmarsimage.cpp -o $(BINDIR)/buildmarsimage  $(LIBS)
+	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(FOLDER)\" $(SRCDIR)/buildmarsimage.cpp -o $(BINDIR)/buildmarsimage  $(LIBS)
 
 $(BINDIR)/halftiff_stb: $(SRCDIR)/halftiff_stb.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/halftiff_stb.cpp -o $(BINDIR)/halftiff_stb  $(LIBS)
