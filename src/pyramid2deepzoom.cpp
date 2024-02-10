@@ -50,8 +50,7 @@ main(int argc, char* argv[]) {
     if (!tifin)
         return 1;
 
-    const char* name = argv[2];
-    // general info available
+     // general info available
     uint16_t bitspersample, samplesperpixel;
 
     TIFFGetField(tifin, TIFFTAG_BITSPERSAMPLE, &bitspersample);
@@ -72,13 +71,15 @@ main(int argc, char* argv[]) {
     TIFFGetField(tifin, TIFFTAG_TILELENGTH, &tileheight);
     unsigned int filetype;
     TIFFGetFieldDefaulted(tifin, TIFFTAG_SUBFILETYPE, &filetype);
+    const char* name  = argc > 2 ? argv[2] : 0;
+
     if (filetype == FILETYPE_REDUCEDIMAGE) {
     } else { //  compute levels
         unsigned int maxdimension = imagewidth;
         if (imageheight > imagewidth) maxdimension = imageheight;
         maxlevel = ceil(log(maxdimension)/log(2));
-        std::cout << "Largest image: " << imagewidth << " " << imageheight << ": " << maxlevel << " levels"<< std::endl;
-           //  TODO: generate the dzi file
+        std::cout << "Largest image: " << imagewidth << " " << imageheight << ": " << maxlevel << " levels" << std::endl;
+         if (argc == 2) return 0;
         char outBuffer[1024];
         sprintf(outBuffer, dziFile, name);
         FILE* tp = fopen(outBuffer, "w");
@@ -86,7 +87,7 @@ main(int argc, char* argv[]) {
         fwrite(outBuffer, 1, len, tp);
         fclose(tp);
     }
- 
+
       for (unsigned int d = 0; d < nDirectories; ++d) {
         TIFFSetDirectory(tifin, d);
         TIFFGetField(tifin, TIFFTAG_IMAGEWIDTH, &imagewidth);

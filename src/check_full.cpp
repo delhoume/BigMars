@@ -12,7 +12,7 @@ using namespace std;
  check for full image data by reading wholee image strip by strip 
 */
 
-bool silent = true;
+bool silent = false;
 
 int main(int argc, char *argv[]) {
   int success = 1;
@@ -29,11 +29,11 @@ TIFFGetField(tifin, TIFFTAG_BITSPERSAMPLE, &bitspersample);
 TIFFGetField(tifin, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
 TIFFGetField(tifin, TIFFTAG_ROWSPERSTRIP, &rows_per_strip);
  
-//  std::cout << "image : " << std::endl
-// 	 << "  size: " << imagewidth << " x " << imageheight << endl
-// 	 << "  rows per strip: " << rows_per_strip << endl
-// 	 << "  sample per pixel: " << samplesperpixel << endl
-// 	 << "  bit per sample: " << bitspersample << endl; 
+ std::cout << "image : " << std::endl
+	 << "  size: " << imagewidth << " x " << imageheight << endl
+	 << "  rows per strip: " << rows_per_strip << endl
+	 << "  samples per pixel: " << samplesperpixel << endl
+	 << "  bits per sample: " << bitspersample << endl; 
 
 std::cout << argv[1];
 if (TIFFIsTiled(tifin)) {
@@ -41,29 +41,21 @@ if (TIFFIsTiled(tifin)) {
   return 1;
 }
 
-tsize_t rawsize = TIFFStripSize(tifin);
 tsize_t datasize = imagewidth * rows_per_strip * samplesperpixel;
-  unsigned char *rawdata = new unsigned char[rawsize];
+  unsigned char *rawdata = new unsigned char[datasize];
 unsigned char *data = new unsigned char[datasize];
+unsigned int nstrips = TIFFNumberOfStrips(tifin);
 
   std::cout << " checking all " << imageheight << " strips" << endl;
   unsigned int strip = 0;
     for (unsigned int y = 0; y < imageheight; y += rows_per_strip, ++strip) {
-         tsize_t readRawBytes = TIFFReadRawStrip(tifin, strip, rawdata, rawsize);
-         if (!silent) {
-            if ((y % 1000) == 0) {
-            std::cout << "|" << y;
-            } else if ((y % 100) == 0) {
-              std::cout << ".";
-            }    
-         }    
-          if (readRawBytes == -1) {    
-                std::cout << "Error reading raw data strip " << y << " " << readRawBytes << std::endl;
-                std::stringstream filename; filename << "raw_" << strip << ".zst";
-                ofstream output(filename.str(), std::ios::binary);
+         tsize_t readRawBytes = TIFFReadRawStrip(tifin, strip, rawdata, datasize);
+           if (readRawBytes == -1 || readRawBytes > datasize) {    
+                std::cout << "Error reading raw data strip " << y << " " << readRawBytes << " " << datasize << std::endl;
+                std::stringstream filename; filename << "debug/raw_" << y << ".zst";
+                ofstream output(filename.str(), ios::binary);
                 output.write((const char*)rawdata, readRawBytes);
                 output.close();
-                return 1;
              }  
  
         //tsize_t readBytes = TIFFReadEncodedStrip(tifin, strip, data, datasize);
@@ -78,23 +70,14 @@ unsigned char *data = new unsigned char[datasize];
  // more efficient
          unsigned int ret = TIFFReadFromUserBuffer(tifin, 0, rawdata, readRawBytes, data, datasize);
          if (ret == 0) {
-            std::cout << "Error reading encoded data strip " << strip << std::endl;
-            std::stringstream filename; filename << "raw2_" << strip << ".zst";
-            ofstream output(filename.str(), std::ios::binary);
-            output.write((const char*)data, datasize);
+            std::cout << "Error decoding data strip " << strip <<  " " << y << " " << readRawBytes << " " << datasize << std::endl;
+            std::stringstream filename; filename << "debug/raw2_" << y << ".zst";
+            ofstream output(filename.str(), ios::binary);
+            output.write((const char*)rawdata, readRawBytes);
             output.close(); 
-            return 2;
-        }
-        if (!silent) {
-              if ((y % 1000) == 0) {
-            std::cout << "|";
-          } else if ((y % 100) == 0) {
-            std::cout << ".";
           }
+          std::cout << "    " << (y + 1) << " / " << nstrips << "    \r";  std::cout.flush();
         }
-        std::cout.flush();
-
-    }
     std::cout << endl << argv[1] << " Done" << endl;
     TIFFClose(tifin);
     delete [] rawdata; 

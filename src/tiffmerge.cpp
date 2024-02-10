@@ -69,15 +69,15 @@ int main(int argc, char* argv[]) {
 		TIFFSetField(tifout, TIFFTAG_EXTRASAMPLES, 1, sampleinfo);
 	 }
 
-	 std::cout << "original size: " << imagewidth << "x" << imageheight << endl;
+	 std::cout << "size: " << imagewidth << "x" << imageheight << endl;
 	 std::cout << "tiles size: " << tilewidth << "x" << tileheight << endl;
 	  
 	  std::cout << idx << " ";
 
       if (((idx == 1) && fullresfirst) || ((idx == nimages) && !fullresfirst)) {
-		std::cout << "Full image" << endl;
+		std::cout << "full image" << endl;
  	} else {
- 		  std::cout << "Reduced image" << endl;
+ 		  std::cout << "reduced image" << endl;
 		  TIFFSetField(tifout, TIFFTAG_SUBFILETYPE, FILETYPE_REDUCEDIMAGE);
     }
       switch (compression) {
@@ -87,17 +87,20 @@ int main(int argc, char* argv[]) {
 			  if (TIFFGetField(tifin, TIFFTAG_JPEGTABLES, &count, &table) && (count > 0) && table) {
 				TIFFSetField(tifout, TIFFTAG_JPEGTABLES, count, table);
 			  }
-			  std::cout << "Jpeg compression" << endl;
+			  std::cout << "jpeg compression" << endl;
 			  break;
 		  }
 		  case COMPRESSION_DEFLATE:
 		  case COMPRESSION_ADOBE_DEFLATE: {
-			  std::cout << "Zip compression" << endl;
+			  std::cout << "deflate compression" << endl;
 		  }
 		  break;
 	}
-      for(y = 0; y < imageheight; y += tileheight) {
-		  std::cout << "   row " << y << "/" << imageheight << "                \r" ;
+	unsigned int current_row = 0;
+	unsigned int numrows = imageheight / tileheight;
+	if (imageheight % tileheight) numrows++;
+      for(y = 0; y < imageheight; y += tileheight, current_row++) {
+		  std::cout << "   row " << (current_row + 1) << "/" << numrows << "                \r" ;
 		  std::cout.flush();
 		  for (x = 0; x < imagewidth; x += tilewidth) {
 			  tsize_t numbytes = TIFFReadRawTile(tifin, 

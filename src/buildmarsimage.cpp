@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string>
 #include <cstring>
+#include <sstream>
 #include <iomanip>
 #include <chrono>
 
@@ -35,20 +37,19 @@ const char *getName(int row, int col, const char* folder = DEFAULT_FOLDER) {
   return buff;
 }
 
-void displayDuration(unsigned int seconds, const char *text = 0) {
+std::string displayDuration(unsigned int seconds) {
   unsigned int hours = seconds / 3600;
   unsigned int minutes = (seconds % 3600) / 60;
   unsigned int sseconds = seconds % 60;
   unsigned int days = hours / 24;
-  if (text)
-    std::cout << text;
-  std::cout << std::setfill('0');
+  std::stringstream str;
+  str << std::setfill('0');
   if (hours >= 24)
-    std::cout << std::setw(2) << days << "d";
-  std::cout << std::setw(2) << (hours % 24) << "h"
-            << std::setw(2) << minutes << "m"
-            << std::setw(2) << sseconds << "s";
-  std::cout << std::setfill(' ');
+    str << std::setw(2) << days << "d";
+  str << std::setw(2) << (hours % 24) << "h"
+      << std::setw(2) << minutes << "m"
+      << std::setw(2) << sseconds << "s";
+  return str.str();
 }
 
 // Exponential moving Average to smooth variations on predicted remaining time
@@ -156,17 +157,17 @@ std::cout << "Final image  " << outfilename << " will be " << to_string(dstwidth
         // for all cols
         const auto rtime = chrono::system_clock::now();
         // would doing this in parallel speed up things ?
-#pragma omp parallel for
+//#pragma omp parallel for
         for (unsigned int col = 0; col < numsrcx; ++col) {
           // compute pos in dstrow
           unsigned char *posindst = dstrow + col * srcwidth;
           // read one strip tif at row col
           if (tifrow[col]) {
-            tsize_t rb = TIFFReadEncodedStrip(tifrow[col], h, posindst, srcwidth);
-            if (rb == -1) {
+            tsize_t rb = TIFFReadEncodedStrip(tifrow[col], h, posindst, -1);
+            if (rb > srcwidth) {
               // not very compatible width Open MP...
               std::cout << "error for " << getName(currow, curcol) << endl;
-            } else if (rb > srcwidth) {
+            } else if (rb != srcwidth) {
               std::cout << "read bytes " << rb << " and buffer size " << srcwidth << " differ " << std::endl;
             }
           } else {
@@ -183,27 +184,23 @@ std::cout << "Final image  " << outfilename << " will be " << to_string(dstwidth
           const auto differenceOneRowWrite = std::chrono::duration_cast<std::chrono::milliseconds>(ctime - btime).count();
           const auto differenceOneRow = std::chrono::duration_cast<std::chrono::milliseconds>(ctime - rtime).count();
           double ppercent = y / (double)dstheight;
-          float fullSecOneRow = (float)differenceOneRow / 1000;
 
-          unsigned int remainingFromCurrentPerf = (unsigned int)(float)differenceOneRow * (dstheight - y) / 1000;
+          unsigned int remainingFromCurrentPerf = differenceOneRow * (dstheight - y) / 1000;
           remainingFromCurrentPerf = (unsigned int)smoothRemainingSeconds.filter(remainingFromCurrentPerf);
 
-          float rate = y / (float)differenceFromStart;
-          unsigned int remainingSecs = (dstheight - y) / rate;
+          float rate = differenceFromStart / (float)y;
+          unsigned int remainingSecs = (dstheight - y) * rate;
 
-          std::cout << std::setw(6) << (y + 1) << " / " << dstheight
+          std::cout << std::setfill(' ') << std::setw(6) << (y + 1) << " / " << dstheight
                     << " # " << std::setw(5) << (h + 1) << " / " << srcheight
                     << " # " << (int)(ppercent * 100) << "%"
-                    << " # abs row N" << currow << " - "
-                    << "(" << (r + 1) << "/" << numsrcy << ")"
-                    << " # mean speed" << std::setw(4) << (unsigned int)rate << " rows/s"
-                    << " # current speed " << std::setw(4) << (unsigned int)(1 / fullSecOneRow) << " rows/s";
-          std::cout << " # R/W  " << std::setw(3) << (unsigned int)differenceOneRowRead 
-               << "/" << std::setw(3) << (unsigned int)differenceOneRowWrite << "ms";
-          displayDuration(differenceFromStart, "# elapsed: ");
-          displayDuration(remainingSecs, " # end in (elapsed): ");
-          displayDuration(remainingFromCurrentPerf, " # end in (perf): ");
-
+                    << " # row N" << currow << " - " << "(" << (r + 1) << "/" << numsrcy << ")"
+                    << " # speed "  << std::setw(4) << differenceOneRowRead << "r/"  
+                    << std::setw(4) << differenceOneRowWrite << "w/" 
+                    << std::setw(4) << differenceOneRow << "t/" 
+                    << std::setw(4) << (unsigned int)(rate * 1000) << "a ms/row";
+          std::cout << " # elapsed: " << displayDuration(differenceFromStart);
+          std::cout << " #end :" << displayDuration(remainingSecs) << "/" <<  displayDuration(remainingFromCurrentPerf);
           std::cout << "           \r";
           std::cout.flush();
         }

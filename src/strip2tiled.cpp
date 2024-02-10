@@ -182,7 +182,8 @@ int main(int argc, char *argv[]) {
 	cout << "image : " << endl
 		 << "  size: " << imagewidth << " x " << imageheight << endl
 		 << "  sample per pixel: " << samplesperpixel << endl
-		 << "  bits per sample: " << bitspersample << endl;
+		 << "  bits per sample: " << bitspersample << endl
+	     << "   rows_per_strip: " <<  rows_per_strip << endl;
 
 	TIFFSetField(tifout, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 	TIFFSetField(tifout, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -227,7 +228,6 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
 
-	fprintf(stderr, "rows_per_strip: %d\n", rows_per_strip);
 	full_tile_data = (unsigned char *)malloc(tileheight * full_tile_width * samplesperpixel);
 	if (full_tile_data == 0) {
 		fprintf(stderr, "bad alloc: %ld bytes\n", tileheight * full_tile_width * samplesperpixel);
@@ -241,24 +241,27 @@ int main(int argc, char *argv[]) {
 	std::cout << "Saving " << to_string(numtilesy) << "rows"; 
 
 	for (unsigned int row = 0; row < numtilesy; ++row) {
-		std::cout << "|" << row;
+		std::cout << "  " << (row + 1) << " / " << numtilesy ;
 		std::cout.flush();
 		//memset(full_tile_data, 128, tileheight * full_tile_width * samplesperpixel);
 
 		for (unsigned int tiley = 0; tiley < tileheight; tiley++) {
 			if (current_strip < imageheight) {
 				// Read one strip
-				TIFFReadEncodedStrip(tifin, current_strip, full_tile_data + full_tile_width * tiley * samplesperpixel, imagewidth * samplesperpixel);
+				tsize_t rb = TIFFReadEncodedStrip(tifin, current_strip, full_tile_data + full_tile_width * tiley * samplesperpixel, -1); // imagewidth * samplesperpixel);
+				if (rb == -1 || rb > (imagewidth * samplesperpixel)) {
+					if (rb != 1) fprintf(stderr, "error at strip %d  rb=%d\n", current_strip, rb);
+				}
 			}
 			current_strip++;
 		}
 		// done reading
-		std::cout << "R";
+		std::cout << "r";
 		std::cout.flush();
 
 		if (debug) {
-		sprintf(buffer, "debug/row_%d.jpg", row);
-		stbi_write_jpg(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 0);
+			sprintf(buffer, "debug/row_%d.jpg", row);
+			stbi_write_jpg(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 0);
 		}
 
 
@@ -283,10 +286,10 @@ int main(int argc, char *argv[]) {
 								 tile_data, samplesperpixel * tilewidth * tileheight);
 		}
 		// all current row tiles written
-		std::cout << "|";
+		std::cout << "w          \r";
 		std::cout.flush();
 	}
-	cout << endl;
+	std::cout << endl;
 	TIFFClose(tifout);
 	TIFFClose(tifin);
 	free(full_tile_data);

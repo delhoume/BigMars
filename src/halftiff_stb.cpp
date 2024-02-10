@@ -100,39 +100,33 @@ int main(int argc, char* argv[]) {
 	TIFFGetField(tifin, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetFieldDefaulted(tifin, TIFFTAG_COMPRESSION, &compression);
 
-    std::cout << "original size:" << imagewidth << "x" << imageheight << endl;
+    std::cout << "bits per sample: " << bps << endl;
+    std:: cout << "samples per pixel: " << spp << endl;
+	std::cout << "original size:" << imagewidth << "x" << imageheight << endl;
     if (!TIFFIsTiled(tifin)) {
 	std::cout << "image is not tiled, please convert using strips2tiled" << endl;
 	return 1;
     }
-    std::cout << "Tile size: " << tilewidth << " x " << tileheight << endl;
+    std::cout << "tile size: " << tilewidth << " x " << tileheight << endl;
     unsigned int numtilesx = imagewidth / tilewidth;
     if (imagewidth % tilewidth) ++numtilesx;
 
     unsigned int numtilesy = imageheight / tileheight;
     if (imageheight % tileheight) ++numtilesy;
+  	 std::cout << "original tiles: " << numtilesx << "x" << numtilesy << endl;
 
     unsigned int newwidth = (unsigned int)floor(imagewidth / 2.0);
     unsigned int newheight = (unsigned int)floor(imageheight / 2.0);
+	if (newwidth < 1) newwidth = 1;	
+	if (newheight < 1) newheight = 1;
     unsigned int newtilesx = newwidth / tilewidth;
     if (newwidth % tilewidth) ++newtilesx;
 
     unsigned int newtilesy = newheight / tileheight;
     if (newheight % tileheight)	++newtilesy;
 
-    std::cout << "bits per sample: " << bps << endl;
-    std:: cout << "samples per pixel: " << spp << endl;
-	std::cout << "photometric: ";
-	switch (photometric) {
-		case PHOTOMETRIC_MINISWHITE: { std::cout << "min is white"; break; }
-		case PHOTOMETRIC_MINISBLACK: { std::cout << "min is black"; break; }
-		case PHOTOMETRIC_RGB:        { std::cout << "rgb"; break; }
-		case PHOTOMETRIC_PALETTE:    { std::cout << "palette"; break; }
-		default:                     { std::cout << photometric; }
-	}
 		
 	std::cout << endl;
-    std::cout << "original tiles: " << numtilesx << "x" << numtilesy << endl;
     std::cout << "new size: " << newwidth << " x " << newheight << endl;
     std::cout << "new tiles: " << newtilesx << " x " << newtilesy << endl;
 
@@ -184,7 +178,6 @@ int main(int argc, char* argv[]) {
    TIFF* tifin_br = TIFFOpen(argv[1], "rb");   
    TIFF* tifin_bl = TIFFOpen(argv[1], "rb");
     for (unsigned int row = 0; row < newtilesy; ++row) {
-		std::cout << "writing tiles for row " << row << " (of " << (newtilesy - 1) << ") ";
 		for (unsigned int col = 0; col < newtilesx; ++col) {
 #pragma omp parallel sections num_threads(4)
    			 {
@@ -269,24 +262,11 @@ int main(int argc, char* argv[]) {
 			// and save
 			int tilenum = TIFFComputeTile(tifout, col * tilewidth, row * tileheight, 0, 0);
 			TIFFWriteEncodedTile(tifout, tilenum, newtiledata, tiledatasize);
-			bool cond = true;
-			unsigned char symb = 'I';
-			if (newtilesy >= 20) {
-				if (newtilesy >= 200) {
-					cond = (col % 100) == 0;
-					symb = 'C';
-				} else {
-					cond = (col  % 10) == 0;
-					symb = 'X';
-				}
-			}
-			if (cond) {
-				std::cout << symb;
-			}
-			std::cout.flush();
 		}
-		std::cout << endl;
+		std::cout << "writing tiles for row " << (row + 1) << " / " << newtilesy << "   \r";
+		std::cout.flush();
     }
+	std::cout << endl;
     TIFFClose(tifout);
     TIFFClose(tifin);
     delete [] newtiledata;

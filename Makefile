@@ -12,8 +12,8 @@ FOLDER = "/Volumes/My Book/BigMars"
 LIBS = /opt/homebrew/lib/libtiff.a  /opt/homebrew/lib/libturbojpeg.a \
     /opt/homebrew/lib/libz-ng.a /opt/homebrew/lib/libzlibstatic.a /opt/homebrew/lib/libzstd.a /opt/homebrew/lib/liblzma.a  -l gomp
 
-PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg $(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom
-
+PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg \
+	$(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom $(BINDIR)/check_full
 all: $(PROGRAMS)
 
 clean:
@@ -23,6 +23,9 @@ clean:
 
 $(BINDIR)/check_all: $(SRCDIR)/check_all.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/check_all.cpp -o $(BINDIR)/check_all $(LIBS)
+
+$(BINDIR)/check_full: $(SRCDIR)/check_full.cpp
+	$(CCC) $(CCFLAGS) $(SRCDIR)/check_full.cpp -o $(BINDIR)/check_full $(LIBS)
 
 $(BINDIR)/buildmarsimage: $(SRCDIR)/buildmarsimage.cpp
 	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(FOLDER)\" $(SRCDIR)/buildmarsimage.cpp -o $(BINDIR)/buildmarsimage  $(LIBS)
