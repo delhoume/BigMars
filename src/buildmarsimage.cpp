@@ -101,17 +101,17 @@ main(int argc, char *argv[]) {
   if (numsrcy < 1) numsrcy = 1;
 
   int stepx = 4;
-  int startx = -4 * (numsrcx / 2); // 4 increment and integers
+  int startx = -stepx * (numsrcx / 2); 
   int stepy = -4;
-  int starty = 4 * (numsrcy / 2 - 1); 
+  int starty = -stepy * (numsrcy / 2); 
 
   unsigned int dstwidth = numsrcx * srcwidth;
   unsigned int dstheight = numsrcy * srcheight;
 
   Ema smoothRemainingSeconds(0.1);
 std::cout << std::setprecision(2);
-std::cout << "Starting from:  " << to_string(startx) << "  " << to_string(starty) <<  std::endl;
-std::cout << "Final image  " << outfilename << " will be " << to_string(dstwidth) << "x" << to_string(dstheight) << std::endl;
+std::cout << "Starting from " << to_string(startx) << "  " << to_string(starty) <<  std::endl;
+std::cout << outfilename << " " << to_string(dstwidth) << "x" << to_string(dstheight) << std::endl;
   // create dst image, open as BigTIFF (obviously)
   TIFF *tifout = TIFFOpen(outfilename, "w8");
   TIFFSetField(tifout, TIFFTAG_IMAGEWIDTH, dstwidth);
