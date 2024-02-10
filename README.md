@@ -1,5 +1,5 @@
 This project is a guide for creating a **single TIFF file** and a Deep Zoom structure that will allow viewing interactively
-a gigantic (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) imaage of Mars surface.
+a gigantic (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
 
 The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
 to be able to view (zoom, unzoom, pan).
