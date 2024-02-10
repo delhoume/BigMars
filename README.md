@@ -192,7 +192,7 @@ I switch to JPEG TIFFs for tiled ones, giving a good performance and much reduce
 In the next step, we will see how to create a Deep Zoom layout, that will allow interactive (and impressive) visualization with a simple
 Web browser
 
-## Step 5 Building a Deep Zoom structure for interactive visualization over http
+## Step 5 Building a Deep Zoom structure for interactive visualization over HTTP
 
 The Deep Zoom distribution system has exactly the same layout as pyramidal TIFFs (precomputed zoom levels,
 each organized as tiles. But instead of having all in a single TIFF, Deep Zoom uses individual files for each tile,
@@ -221,6 +221,9 @@ And the last step, launch a local HTTP server:
 ```http-server```
 
 Open a Web Browser and nagivate to ```http://127.0.0.1/mars_40_40.html```
+
+You can also deploy directly on a Web server provided you have enough disk space...
+You will only need the .dzi, the .html, openseadragon.min.js and the full tile hierarchy.
 
 All this impressive achievement is only possible because of the incredible work by people at
 https://openseadragon.github.io
