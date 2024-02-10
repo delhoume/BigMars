@@ -91,7 +91,7 @@ main(int argc, char *argv[]) {
 
   unsigned int srcwidth = 47420;
   unsigned int srcheight = 47420;
-  const char* outfilename = argc > 1 ? argv[1] : "mars_strip.tif";
+  const char* outfilename = argc > 1 ? argv[1] : "mars_90_44_strip.tif";
   unsigned int numsrcx = argc > 2 ? atoi(argv[2]) : 90;
   unsigned int numsrcy = argc > 3 ? atoi(argv[3]) : 44;
 
