@@ -116,11 +116,11 @@ because they must be fully loaded even if only a smart part  is visible on-scree
 **open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
 
-Next step swill see us generate images 90 times larger and from 2 to 44  times higher...
+Next step swill see us generate images up to 90 times larger and 44 times higher...
 
 ## Step 3 Building a 189680x189680 pyramidal image
 
-When you deal with such large images (or data) you have to mitigate the fact that you cannot load it in memory (by far).
+When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
 While it is possible to write code that generates a tiled TIFF directly from the TIFFs generated at step 2, my strategy is to generate first a 
 one pixel per strip full image, then convert it to tiled.
