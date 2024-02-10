@@ -209,13 +209,12 @@ For mars_40_40_pyramid.tif, the following command
 ```bin/pyramid2deepzoom mars_40_40_pyramid.tif``` will tell you the largest Deep Zoom level for this input. for this image.
 You then create the needed disk hierarchy using:
 ```
-mkdir Mars40_40DeepZoom_files
-seq 1 18 | xargs -I % mkdir Mars40_40DeepZoom_files/%
+seq 1 18 | xargs -I % mkdir -p Mars40_40DeepZoom_files/%
 bin/pyramid2deepzoom mars_40_40_pyramid.tif Mars40_40
 ```
 
-After a while you should have all tiles (that can be a huge number) as JPEGs in some sub-folders (not all of them migght have content, 
-depending on what  levels are in the source TIFF.
+After a while you should have all tiles (that can be a huge number) as JPEGs in some of the sub-folders (not all of them might have content, 
+depending on what levels are in the source TIFF.
 
 You will also have the Mars40_40DeepZoom.dzi file generated for you.
 
