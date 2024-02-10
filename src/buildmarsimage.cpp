@@ -86,7 +86,7 @@ main(int argc, char *argv[]) {
     std::cout << "Usage: buildmarsimage <out.tif> <cols> <rows>" << std::endl;
     std::cout << "       cols 1..90" << std::endl;   
     std::cout << "       rows 1..44" << std::endl;
-    std::cout << "       no arg mean buildmarsimage mars_strip.tif 90 44" << std::endl;
+    std::cout << "       no arg means buildmarsimage mars_90_44_strip.tif 90 44" << std::endl;
     std::cout << "       fdelhoume 2024" << std::endl;
 
   unsigned int srcwidth = 47420;
