@@ -108,7 +108,8 @@ They take about 5.5 To of disk space.
 
 If you want to view the ZippedTiffs, you will have to convert them to  tiled format  that Vliv (Windows only) can open.
 It is still possible to open them using normal viewers but it might be slow and ultimately fail because of the 47420x47420 size.
-Vliv can load-on-demand strips as well as tiles TIFFs, but in this case strips are very large and it is not optimal at all.
+Vliv can load-on-demand TIFFs with strips or tiles with minimal memory requirements but in this case strips are very large and it is not optimal at all
+because they must be fully loaded even if only a smart part  is visible on-screen.
 
 ```bin/strip2tiled.jpg MurrayLab_CTX_V01_E000_N-00_Mosaic.tif center.tif```
 
@@ -123,7 +124,7 @@ When you deal with such large images (or data) you have to mitigate the fact tha
 
 While it is possible to write code that generates a tiled TIFF directly from the TIFFs generated at step 2, my strategy is to generate first a 
 one pixel per strip full image, then convert it to tiled.
-The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a moisaic given a number of rows and columns.
+The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a mosaic given a number of rows and columns.
  you can start with a modest ```bin/buildmarsimage mars_4_4_strip.tif 4 4```  that will only take less than one hour.
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
@@ -216,7 +217,7 @@ bin/pyramid2deepzoom mars_40_40_pyramid.tif Mars40_40
 After a while you should have all tiles (that can be a huge number) as JPEGs in some of the sub-folders (not all of them might have content, 
 depending on what levels are in the source TIFF.
 
-You will also have the Mars40_40DeepZoom.dzi file generated for you.
+You will also have the ```Mars40_40DeepZoom.dzi``` file generated for you.
 
 Now you just need to change the referenced dzi name in the deepzoom.tpl.html file:
 ```sed 's/SOURCE/Mars40_40/g' deepzoom.tpl.html > mars_40_40.html```
