@@ -101,20 +101,20 @@ main(int argc, char* argv[]) {
 
             unsigned int tileImageBufferSize = tilewidth * samplesperpixel * tileheight;
             unsigned char* tileImageBuffer = new unsigned char[tileImageBufferSize];
-             std::cout << "Current image: " << imagewidth << " " << imageheight  << " level " << level << std::endl;
-            std::cout << "Generating " << (numtilesx * numtilesy) << " tiles" << std::endl;
+             std::cout << "Level " << level << " " << imagewidth << "x" << imageheight  << " : " << (numtilesx * numtilesy) << " tiles " << std::endl;
             for (unsigned row = 0; row < numtilesy; ++row) {
                 for (unsigned int col = 0; col < numtilesx; ++col) {
                     TIFFReadEncodedTile(tifin, TIFFComputeTile(tifin, col * tilewidth, row * tileheight, 0, 0),
                         tileImageBuffer, tileImageBufferSize);
                     char outBuffer[128];
                     sprintf(outBuffer, tilePattern, name, level, col, row);
-                    std::cout << "Generating tile " << outBuffer << " " << (row * numtilesx  + col + 1) << " / " << (numtilesx * numtilesy) << "    \r";
+                    std::cout << "   tile " << outBuffer << " " << (row * numtilesx  + col + 1) << " / " << (numtilesx * numtilesy) << "    \r";
                     std::cout.flush();
                   stbi_write_jpg(outBuffer, tilewidth, tileheight, samplesperpixel, tileImageBuffer, 85);
                 }
             }
             delete [] tileImageBuffer;
+            std::cout << endl;
         }
     }
     std::cout << std::endl << "All done" << std::endl;

@@ -100,11 +100,12 @@ int main(int argc, char* argv[]) {
 	TIFFGetField(tifin, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetFieldDefaulted(tifin, TIFFTAG_COMPRESSION, &compression);
 
-    std::cout << "bits per sample: " << bps << endl;
-    std:: cout << "samples per pixel: " << spp << endl;
+    // std::cout << "bits per sample: " << bps << endl;
+    // std:: cout << "samples per pixel: " << spp << endl;
 	std::cout << "original size:" << imagewidth << "x" << imageheight << endl;
     if (!TIFFIsTiled(tifin)) {
-	std::cout << "image is not tiled, please convert using strips2tiled" << endl;
+		std::cout << "image is not tiled, please convert using strips2tiled" << endl;
+		TIFFClose(tifin);
 	return 1;
     }
     std::cout << "tile size: " << tilewidth << " x " << tileheight << endl;

@@ -173,17 +173,23 @@ int main(int argc, char *argv[]) {
 
 	TIFFGetField(tifin, TIFFTAG_ROWSPERSTRIP, &rows_per_strip);
 
-	if (rows_per_strip != 1)
-	{
-		std::cout << "rows per strip: " << rows_per_strip << " must be 1" << endl;
+	unsigned int notaccepted = 0;
+	if (TIFFIsTiled(tifin)) notaccepted = 1;
+	else if (rows_per_strip != 1) notaccepted = 2;
+
+	if (notaccepted) {
+		switch (notaccepted) {
+			case 1: std::cout << "input is already tiled"<< std::endl; break;
+			case 2: std::cout << "rows per strip: " << rows_per_strip << " must be 1" << endl; break;
+			default: std::cout << "not suitable" << std::endl;
+		}
 		TIFFClose(tifin);
 		return 0;
 	}
-	cout << "image : " << endl
-		 << "  size: " << imagewidth << " x " << imageheight << endl
-		 << "  sample per pixel: " << samplesperpixel << endl
-		 << "  bits per sample: " << bitspersample << endl
-	     << "   rows_per_strip: " <<  rows_per_strip << endl;
+	cout << "size: " << imagewidth << " x " << imageheight << endl
+		 << "samples per pixel: " << samplesperpixel << endl
+		 << "bits per sample: " << bitspersample << endl
+	     << "rows per strip: " <<  rows_per_strip << endl;
 
 	TIFFSetField(tifout, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 	TIFFSetField(tifout, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -198,19 +204,6 @@ int main(int argc, char *argv[]) {
 		sampleinfo[0] = EXTRASAMPLE_UNASSALPHA;
 		TIFFSetField(tifout, TIFFTAG_EXTRASAMPLES, 1, sampleinfo);
 	}
-
-#if defined(USE_JPEG)
-	unsigned int compression = 75;
-	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
-	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, compression);
-	fprintf(stderr, "JPEG compression: %d\n", compression);
-
-#else
-	unsigned int compression = Z_BEST_COMPRESSION;
-	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
-	TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, compression);
-	fprintf(stderr, "Deflate compression: %d\n", compression);
-#endif
 
 	TIFFSetField(tifout, TIFFTAG_TILEWIDTH, tilewidth);
 	TIFFSetField(tifout, TIFFTAG_TILELENGTH, tileheight);
@@ -227,6 +220,18 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "final size: %d x %d\n", imagewidth, imageheight);
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
+#if defined(USE_JPEG)
+	unsigned int compression = 75;
+	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
+	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, compression);
+	fprintf(stderr, "jpeg compression: %d\n", compression);
+
+#else
+	unsigned int compression = Z_BEST_COMPRESSION;
+	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
+	TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, compression);
+	fprintf(stderr, "deflate compression: %d\n", compression);
+#endif
 
 	full_tile_data = (unsigned char *)malloc(tileheight * full_tile_width * samplesperpixel);
 	if (full_tile_data == 0) {
@@ -286,7 +291,7 @@ int main(int argc, char *argv[]) {
 								 tile_data, samplesperpixel * tilewidth * tileheight);
 		}
 		// all current row tiles written
-		std::cout << "w          \r";
+		std::cout << "w                      \r";
 		std::cout.flush();
 	}
 	std::cout << endl;
