@@ -17,6 +17,6 @@ echo $BASEINPUT
 echo $NAME
 seq 1 25 | xargs -I % mkdir -p $NAME$DEEP_ZOOM_FILES_FOLDER/%
 
-$BIGMARS_DIR/bin/pyramid2deepzoom $INPUT $NAME
+#$BIGMARS_DIR/bin/pyramid2deepzoom $INPUT $NAME
 
-sed 's/SOURCE/$BASEINPUT/g' deepzoom.tpl.html > $BASEINPUT.$HTML_EXT
+sed "s/SOURCE/$BASEINPUT/g" deepzoom.tpl.html > $BASEINPUT.$HTML_EXT
