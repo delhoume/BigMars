@@ -116,49 +116,53 @@ because they must be fully loaded even if only a smart part  is visible on-scree
 **open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
 
+You can try ```bin/strip2iled.zip``` that will create a lossless but much larger file.
+
 Next step swill see us generate images up to 90 times larger and 44 times higher...
 
 ## Step 3 Building a 189680x189680 pyramidal image
 
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
-While it is possible to write code that generates a tiled TIFF directly from the TIFFs generated at step 2, my strategy is to generate first a 
+While it is possible to write code that generates a tiled TIFF directly from the TIFFs processed at step 2, my strategy is to generate first a 
 one pixel per strip full image, then convert it to tiled.
 The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a mosaic given a number of rows and columns.
  you can start with a modest ```bin/buildmarsimage mars_4_4_strip.tif 4 4```  that will only take less than one hour.
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
- You can change the folder where ZippedTiffs is to be found when building the commands in the source code
+ You can change the folder where ZippedTiffs are to be found when building the commands in the source code
  See variable FOLDER in the Makefile 
 
- As for the single tile TIFFS, you will have to convert it to tiled format to display with Vliv.
-```bin/strip2tiled.jpg mars_4_4_strip.tif 0.tif```
+We will create a so called pyramid, successive images with half width and height from previous one, until the dimension reach a screen viewable size or 1x1 pixel.
+Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory.
 
-In order to zoom and unzoom in this very large image without loading it into memory, we will create a so called pyramid, successive
-images with half width and height from previous one, until you reach a screen viewable size (or a 1x1 pixel image).
-Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory (5 times a single tile).
+The manual commands to build the pyramid are:
 
 ```
-bin/hafltiff_stb 0.tif 1.tif
-bin/hafltiff_stb 1.tif 2.tif
-bin/hafltiff_stb 2.tif 3.tif
-bin/hafltiff_stb 3.tif 4.tif
-bin/hafltiff_stb 4.tif 5.tif
-bin/hafltiff_stb 5.tif 6.tif
-bin/hafltiff_stb 6.tif 7.tif
-bin/hafltiff_stb 7.tif 8.tif
+mkdir -p temp/
+bin/strip2tiled.jpg mars_4_4_strip.tif temp/0.tif
+bin/hafltiff_stb temp/0.tif temp/1.tif
+bin/hafltiff_stb temp/1.tif temp/2.tif
+bin/hafltiff_stb temp/2.tif temp/3.tif
+bin/hafltiff_stb temp/3.tif temp/4.tif
+bin/hafltiff_stb temp/4.tif temp/5.tif
+bin/hafltiff_stb temp/5.tif temp/6.tif
+bin/hafltiff_stb temp/6.tif temp/7.tif
+bin/hafltiff_stb temp/7.tif temp/8.tif
+bin/tiffmerge.first temp/0.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/5.tif temp/6.tif temp/7.tif temp/8.tif mars_4_4_pyramid.tif
 ```
 
-The last image should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
+```temp/8.tif``` should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
+To display information on a TIFF file, use ```tiffinfo temp/5.tif``` 
 
-The final step is to assemble all levels into a single TIFF:
+All these manual steps have been grouped into a script:
 
-```bin/tiffmerge.first 0.tif 1.tif 2.tif 3.tif 4.tif 5.tif 6.tif 7.tif 8.tif mars_4_4_pyramid.tif```
+```source scripts/generate_pyramid.sh mars_4_4_strip.tif 8```
 
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
 
-It can be opened in Vliv and you can navigate through levels using the mouse wheel, giving the illusion of instant zoom. Note also that Vliv supports a joystick
-for panning and (un)zooming.
+It can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
+for navigation
 
 
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
@@ -201,31 +205,19 @@ The Deep Zoom distribution system has exactly the same layout as pyramidal TIFFs
 each organized as tiles. But instead of having all in a single TIFF, Deep Zoom uses individual files for each tile,
 layed out in a one folder per zoom level disk hierarchy.
 
-There are a number of utilites that will generate this structure from a source image, but as it is very easy to create it from
-an already existing pyramidal TIFF, I wrote the ```src/pyramid2deepzoom.cpp``` program.
-I can however recommend the great https://www.libvips.org/
+There are a number of utilities that will generate this structure from a source image, but as it is very easy to create it from
+an already existing pyramidal TIFF, I wrote ```src/pyramid2deepzoom.cpp``` and ```scripts/generate_deepzoom.sh```
+I can however recommend the great https://www.libvips.org/ if you look for alternatives.
 
-First you have to create a hierarchy for tiles, my program does not create folders.
-For mars_40_40_pyramid.tif, the following command
-```bin/pyramid2deepzoom mars_40_40_pyramid.tif``` will tell you the largest Deep Zoom level for this input. for this image.
-You then create the needed disk hierarchy using:
-```
-seq 1 18 | xargs -I % mkdir -p Mars40_40DeepZoom_files/%
-bin/pyramid2deepzoom mars_40_40_pyramid.tif Mars40_40
-```
+```source scripts/generate_deepzoom.sh mars_40_40_pyramid.tif```
 
 After a while you should have all tiles (that can be a huge number) as JPEGs in some of the sub-folders (not all of them might have content, 
 depending on what levels are in the source TIFF.
 
-You will also have the ```Mars40_40DeepZoom.dzi``` file generated for you.
-
-Now you just need to change the referenced dzi name in the deepzoom.tpl.html file:
-```sed 's/SOURCE/Mars40_40/g' deepzoom.tpl.html > mars_40_40.html```
-
-And the last step, launch a local HTTP server:
+The script also creates a .HTML file and a .DZI, so all you have to do is launch a local HTTP server:
 ```http-server```
 
-Open a Web Browser and nagivate to ```http://127.0.0.1:8080/mars_40_40.html``` or the address displayed by the http server.
+and nagivate to ```http://127.0.0.1:8080/mars_40_40.html``` or the address displayed by the http server.
 
 You can also deploy directly on a Web server provided you have enough disk space...
 You will only need the .dzi, the .html, openseadragon.min.js and the full tile hierarchy.
