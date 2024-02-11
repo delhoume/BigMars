@@ -228,6 +228,8 @@ https://openseadragon.github.io
 Ultimately I would like that Vliv implements this kind of navigation and smoothness, instead of beeing tied to fixed levels
 when zooming.
 
+![Deep zoom image in a browser for mars_40_40](images/deepzoom.png)
+
 For more information on DeepZoom, a very good source is OpenSeaDragon Github, and https://www.gasi.ch/blog/inside-deep-zoom-2
 
 
