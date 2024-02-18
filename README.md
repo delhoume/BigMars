@@ -155,9 +155,9 @@ bin/tiffmerge.first temp/0.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/
 ```temp/8.tif``` should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
 To display information on a TIFF file, use ```tiffinfo temp/5.tif``` 
 
-All these manual steps have been grouped into a script:
+All these manual steps have been grouped into a script (second param is number of levels)
 
-```source scripts/generate_pyramid.sh mars_4_4_strip.tif 8```
+```source scripts/generate_pyramid.sh mars_4_4_strip.tif 12```
 
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
 
