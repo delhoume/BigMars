@@ -93,15 +93,14 @@ main(int argc, char* argv[]) {
         TIFFGetField(tifin, TIFFTAG_IMAGEWIDTH, &imagewidth);
         TIFFGetField(tifin, TIFFTAG_IMAGELENGTH, &imageheight);
        if (TIFFIsTiled(tifin)) {
-             unsigned int level = maxlevel - d;
-            unsigned int numtilesx = imagewidth / tilewidth;
-            unsigned int numtilesy = imageheight / tileheight;
-             if (imagewidth % tilewidth) ++numtilesx;
-            if (imageheight % tileheight) ++numtilesy;
-
+            unsigned int level = maxlevel - d;
+            unsigned int alltiles = TIFFNumberOfTiles(tifin); 
+            unsigned int numtilesx = alltiles / tilewidth; // (imagewidth + tilewidth-1)/tilewidth;
+            unsigned int numtilesy = alltiles / tileheight; // (imageheight + tileheight-1)/tileheight;
             unsigned int tileImageBufferSize = tilewidth * samplesperpixel * tileheight;
             unsigned char* tileImageBuffer = new unsigned char[tileImageBufferSize];
-             std::cout << "Level " << level << " " << imagewidth << "x" << imageheight  << " : " << (numtilesx * numtilesy) << " tiles " << std::endl;
+             std::cout << "Level " << level << " " << imagewidth << "x" << imageheight << std::endl;
+             std::cout << "Tiles  " << numtilesx << "x" <<  numtilesy << " tiles total " << (numtilesx * numtilesy) << std::endl;
             for (unsigned row = 0; row < numtilesy; ++row) {
                 for (unsigned int col = 0; col < numtilesx; ++col) {
                     TIFFReadEncodedTile(tifin, TIFFComputeTile(tifin, col * tilewidth, row * tileheight, 0, 0),

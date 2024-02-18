@@ -64,14 +64,14 @@ void CopytoBR(const unsigned char* source, unsigned char* dest, const unsigned i
 	}
 }
  
-int MYTIFFCheckTile(unsigned int tx, unsigned int ty, unsigned int tilesize, 
+int MYTIFFCheckTile(TIFF* tif, unsigned int tx, unsigned int ty, unsigned int tilesize, 
 				unsigned int imagewidth, unsigned int imageheight) {
 	if ((tx * tilesize) >= imagewidth) {
-//		cout << " bad x tile " << tx <<  "(" << tilesize << " " << imagewidth << ")" << endl;
+		cout << " bad x tile " << tx <<  "(" << tilesize << " " << imagewidth << ")" << endl;
 		return 0;
 	}
 	if ((ty * tilesize) >= imageheight) {
-//		cout << " bad y tile " << ty <<  "(" << tilesize << " " << imageheight << ")" << endl;
+		cout << " bad y tile " << ty <<  "(" << tilesize << " " << imageheight << ")" << endl;
 		return 0;
 	}
 	return 1;
@@ -108,23 +108,22 @@ int main(int argc, char* argv[]) {
 		TIFFClose(tifin);
 	return 1;
     }
-    std::cout << "tile size: " << tilewidth << " x " << tileheight << endl;
-    unsigned int numtilesx = imagewidth / tilewidth;
-    if (imagewidth % tilewidth) ++numtilesx;
-
-    unsigned int numtilesy = imageheight / tileheight;
-    if (imageheight % tileheight) ++numtilesy;
-  	 std::cout << "original tiles: " << numtilesx << "x" << numtilesy << endl;
-
-    unsigned int newwidth = (unsigned int)floor(imagewidth / 2.0);
-    unsigned int newheight = (unsigned int)floor(imageheight / 2.0);
+	int ntiles = TIFFNumberOfTiles(tifin); 
+	int numtilesx = ntiles / tilewidth;
+	int numtilesy = ntiles/ tileheight;
+	int Horizontal_Tiles = (imagewidth + tilewidth-1)/tilewidth;
+	std::cout << "tilesize: " << tilewidth << " x " << tileheight << endl;
+ 	std::cout << "total tiles: " << ntiles << " (" << numtilesx << " x " << numtilesy << ")" << std::endl;
+	
+    unsigned int newwidth = (imagewidth + 1) >> 1;
+    unsigned int newheight = (imageheight + 1) >> 1;
 	if (newwidth < 1) newwidth = 1;	
 	if (newheight < 1) newheight = 1;
-    unsigned int newtilesx = newwidth / tilewidth;
-    if (newwidth % tilewidth) ++newtilesx;
 
-    unsigned int newtilesy = newheight / tileheight;
-    if (newheight % tileheight)	++newtilesy;
+    unsigned int newtilesx = (newwidth + tilewidth-1)/tilewidth;
+	unsigned int newtilesy   = (newheight + tileheight-1)/tileheight;
+
+ 	std::cout << "tilesize: " << tilewidth << " x " << tileheight << endl;
 
 		
 	std::cout << endl;
@@ -186,7 +185,7 @@ int main(int argc, char* argv[]) {
 #pragma omp section
 				{
 					// top left
-					if (MYTIFFCheckTile(col * 2, row * 2, tilewidth, imagewidth, imageheight)) {
+					if (MYTIFFCheckTile(tifout, col * 2, row * 2, tilewidth, imagewidth, imageheight)) {
 						ttile_t tilenum = TIFFComputeTile(tifin, col * 2 * tilewidth, row * 2 * tileheight, 0, 0);
 						TIFFReadEncodedTile(tifin, tilenum, (uint32_t*)topleft, tiledatasize);
 					} else {
@@ -199,7 +198,7 @@ int main(int argc, char* argv[]) {
 #pragma omp section
 				 // top right
 				{
-				if (MYTIFFCheckTile(col * 2 + 1, row * 2, tilewidth, imagewidth, imageheight)) {
+				if (MYTIFFCheckTile(tifout, col * 2 + 1, row * 2, tilewidth, imagewidth, imageheight)) {
 					ttile_t tilenum = TIFFComputeTile(tifin_tr, (col * 2 + 1) * tilewidth, row * 2 * tileheight, 0, 0);
 					TIFFReadEncodedTile(tifin_tr, tilenum,  (uint32_t*)topright, tiledatasize);
 					} else {
@@ -211,7 +210,7 @@ int main(int argc, char* argv[]) {
 #pragma omp section
 				{
 					// bottom left
-					if (MYTIFFCheckTile(col * 2, row * 2 + 1,  tilewidth, imagewidth, imageheight)) {
+					if (MYTIFFCheckTile(tifout, col * 2, row * 2 + 1,  tilewidth, imagewidth, imageheight)) {
 					ttile_t tilenum = TIFFComputeTile(tifin_bl, col * 2 * tilewidth, (row * 2 + 1) * tileheight, 0, 0);
 						TIFFReadEncodedTile(tifin_bl, tilenum, (uint32_t*)bottomleft, tiledatasize);
 					} else {
@@ -223,7 +222,7 @@ int main(int argc, char* argv[]) {
 #pragma omp section
 				{
 					// bottom right
-					if (MYTIFFCheckTile(col * 2 + 1, row * 2 + 1,  tilewidth, imagewidth, imageheight)) {
+					if (MYTIFFCheckTile(tifout, col * 2 + 1, row * 2 + 1,  tilewidth, imagewidth, imageheight)) {
 					ttile_t tilenum = TIFFComputeTile(tifin_br, (col * 2 + 1) * tilewidth, (row * 2 + 1) * tileheight, 0, 0);
 					TIFFReadEncodedTile(tifin_br, tilenum, (uint32_t*)bottomright, tiledatasize); 
 					} else {

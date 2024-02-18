@@ -3,3 +3,13 @@ src/.DS_Store
 images/.DS_Store
 .DS_Store
 .vscode/settings.json
+bin/buildmarsimage
+bin/check_all
+bin/check_full
+bin/halftiff_stb
+bin/pyramid2deepzoom
+bin/strip2tiled.jpg
+bin/strip2tiled.zip
+bin/tiffmerge.first
+bin/buildmarsimage
+bin/buildmarsimage

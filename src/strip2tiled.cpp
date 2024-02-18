@@ -207,15 +207,9 @@ int main(int argc, char *argv[]) {
 
 	TIFFSetField(tifout, TIFFTAG_TILEWIDTH, tilewidth);
 	TIFFSetField(tifout, TIFFTAG_TILELENGTH, tileheight);
-
-	numtilesx = imagewidth / tilewidth;
-	if (imagewidth % tilewidth)
-		++numtilesx;
-	full_tile_width = numtilesx * tilewidth;
-
-	numtilesy = imageheight / tileheight;
-	if (imageheight % tileheight)
-		++numtilesy;
+	
+	numtilesx = (imagewidth + tilewidth-1)/tilewidth;
+	numtilesy = (imageheight + tileheight-1)/tileheight;
 
 	fprintf(stderr, "final size: %d x %d\n", imagewidth, imageheight);
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
