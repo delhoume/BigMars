@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
       unsigned int x, y;
       
       TIFF* tifin = TIFFOpen(argv[idx], "rm");
+	  if (!tifin) continue;
       tdata_t tilebuf = _TIFFmalloc(TIFFTileSize(tifin));
       std::cout << "current file: " << argv[idx] << " (" << TIFFTileSize(tifin) << ")" << endl;
 	  

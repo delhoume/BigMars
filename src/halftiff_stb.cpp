@@ -81,6 +81,10 @@ int main(int argc, char* argv[]) {
 //	TIFFSetWarningHandler(0);
  
     TIFF* tifin = TIFFOpen(argv[1], "rb");
+	if (!tifin) {
+		std::cout << "could not open " << argv[1] << std::endl;
+		return 1;
+	}
 
     unsigned int imagewidth = 0;
     unsigned int imageheight = 0;
@@ -106,12 +110,18 @@ int main(int argc, char* argv[]) {
     if (!TIFFIsTiled(tifin)) {
 		std::cout << "image is not tiled, please convert using strips2tiled" << endl;
 		TIFFClose(tifin);
-	return 1;
+		return 1;
     }
 	int ntiles = TIFFNumberOfTiles(tifin); 
 	int numtilesx = ntiles / tilewidth;
-	int numtilesy = ntiles/ tileheight;
-	int Horizontal_Tiles = (imagewidth + tilewidth-1)/tilewidth;
+	int numtilesy = ntiles / tileheight;
+
+	if ((numtilesx == 1) || (numtilesy == 1)) {
+		std::cout << "final image smaller than one tile, nothing to do" << endl;
+		TIFFClose(tifin);
+		return 1;
+    }
+
 	std::cout << "tilesize: " << tilewidth << " x " << tileheight << endl;
  	std::cout << "total tiles: " << ntiles << " (" << numtilesx << " x " << numtilesy << ")" << std::endl;
 	

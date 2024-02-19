@@ -8,9 +8,9 @@ EXT=".tif"
 TEMP_FOLDER="temp"
 SEP=" "
 FINAL_SUFFIX="_pyramid"
-BIGMARS_DIR="."
+BIGMARS_DIR="/Users/fredericdelhoume/Documents/GitHub/BigMars"
 
-NUMLEVELS=$2
+NUMLEVELS=${2:-20}
 
 mkdir -p $TEMP_FOLDER
 

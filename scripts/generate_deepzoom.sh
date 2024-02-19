@@ -5,7 +5,7 @@ TIFF_EXT="tif"
 PYRAMID_EXT="_pyramid"
 TEMP_SUFFIX="_files"
 DEEP_ZOOM_FILES_FOLDER="DeepZoom_files"
-BIGMARS_DIR="."
+BIGMARS_DIR="/Users/fredericdelhoume/Documents/GitHub/BigMars"
 
 
 INPUT=$1
