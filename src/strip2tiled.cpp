@@ -61,19 +61,16 @@ cpTag(TIFF *tifin, TIFF *tifout, uint16_t tag, uint16_t count, TIFFDataType type
 	}
 	break;
 	case TIFF_RATIONAL:
-		if (count == 1)
-		{
+		if (count == 1) {
 			float floatv;
 			CopyField(tag, floatv);
 		}
-		else if (count == (uint16_t)-1)
-		{
+		else if (count == (uint16_t)-1) {
 			float *floatav;
 			CopyField(tag, floatav);
 		}
 		break;
-	case TIFF_ASCII:
-	{
+	case TIFF_ASCII: {
 		char *stringv;
 		CopyField(tag, stringv);
 	}
@@ -215,10 +212,10 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
 #if defined(USE_JPEG)
-	unsigned int compression = 75;
+	unsigned int quality = 75;
 	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
-	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, compression);
-	fprintf(stderr, "jpeg compression: %d\n", compression);
+	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, quality);
+	fprintf(stderr, "jpeg quality: %d\n", quality);
 
 #else
 	unsigned int compression = Z_BEST_COMPRESSION;
@@ -226,7 +223,7 @@ int main(int argc, char *argv[]) {
 	TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, compression);
 	fprintf(stderr, "deflate compression: %d\n", compression);
 #endif
-
+    full_tile_width = imagewidth;
 	full_tile_data = (unsigned char *)malloc(tileheight * full_tile_width * samplesperpixel);
 	if (full_tile_data == 0) {
 		fprintf(stderr, "bad alloc: %ld bytes\n", tileheight * full_tile_width * samplesperpixel);
@@ -242,15 +239,12 @@ int main(int argc, char *argv[]) {
 	for (unsigned int row = 0; row < numtilesy; ++row) {
 		std::cout << "  " << (row + 1) << " / " << numtilesy ;
 		std::cout.flush();
-		//memset(full_tile_data, 128, tileheight * full_tile_width * samplesperpixel);
 
+//		memset(full_tile_data, 0, tileheight * full_tile_width * samplesperpixel);
 		for (unsigned int tiley = 0; tiley < tileheight; tiley++) {
 			if (current_strip < imageheight) {
 				// Read one strip
-				tsize_t rb = TIFFReadEncodedStrip(tifin, current_strip, full_tile_data + full_tile_width * tiley * samplesperpixel, -1); // imagewidth * samplesperpixel);
-				if (rb == -1 || rb > (imagewidth * samplesperpixel)) {
-					if (rb != 1) fprintf(stderr, "error at strip %d  rb=%d\n", current_strip, rb);
-				}
+				TIFFReadEncodedStrip(tifin, current_strip, full_tile_data + full_tile_width * tiley * samplesperpixel, imagewidth * samplesperpixel);
 			}
 			current_strip++;
 		}
@@ -260,7 +254,7 @@ int main(int argc, char *argv[]) {
 
 		if (debug) {
 			sprintf(buffer, "debug/row_%d.jpg", row);
-			stbi_write_jpg(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 0);
+			stbi_write_jpg(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 80);
 		}
 
 
@@ -274,7 +268,7 @@ int main(int argc, char *argv[]) {
 			}
 			if (debug) {
 				sprintf(buffer, "debug/row_%d_col_%d.jpg", row, col);
-				stbi_write_jpg(buffer, (int)tilewidth, (int)tileheight, samplesperpixel, tile_data, 0);
+				stbi_write_jpg(buffer, (int)tilewidth, (int)tileheight, samplesperpixel, tile_data, 80);
 			}
 			//write the tile
 			TIFFWriteEncodedTile(tifout,

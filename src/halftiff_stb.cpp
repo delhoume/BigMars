@@ -67,11 +67,13 @@ void CopytoBR(const unsigned char* source, unsigned char* dest, const unsigned i
 int MYTIFFCheckTile(TIFF* tif, unsigned int tx, unsigned int ty, unsigned int tilesize, 
 				unsigned int imagewidth, unsigned int imageheight) {
 	if ((tx * tilesize) >= imagewidth) {
-		cout << " bad x tile " << tx <<  "(" << tilesize << " " << imagewidth << ")" << endl;
+//		cout << " out of range xtile " << tx <<  " (" << tilesize << " " << imagewidth << ")" << endl;
+//		cout << " out of range xtile " << (tx * tilesize) << " " << imagewidth << endl;
 		return 0;
 	}
 	if ((ty * tilesize) >= imageheight) {
-		cout << " bad y tile " << ty <<  "(" << tilesize << " " << imageheight << ")" << endl;
+//		cout << " out of range ytile " << ty <<  " (" << tilesize << " " << imageheight << ")" << endl;
+//		cout << " out of range ytile " << (ty * tilesize) << " " << imagewidth << endl;
 		return 0;
 	}
 	return 1;
@@ -113,8 +115,8 @@ int main(int argc, char* argv[]) {
 		return 1;
     }
 	int ntiles = TIFFNumberOfTiles(tifin); 
-	int numtilesx = ntiles / tilewidth;
-	int numtilesy = ntiles / tileheight;
+	unsigned int numtilesx = (imagewidth + tilewidth-1)/tilewidth;
+	unsigned int numtilesy = (imageheight + tileheight-1)/tileheight;
 
 	if ((numtilesx == 1) || (numtilesy == 1)) {
 		std::cout << "final image smaller than one tile, nothing to do" << endl;

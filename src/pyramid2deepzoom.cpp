@@ -95,8 +95,8 @@ main(int argc, char* argv[]) {
        if (TIFFIsTiled(tifin)) {
             unsigned int level = maxlevel - d;
             unsigned int alltiles = TIFFNumberOfTiles(tifin); 
-            unsigned int numtilesx = alltiles / tilewidth; // (imagewidth + tilewidth-1)/tilewidth;
-            unsigned int numtilesy = alltiles / tileheight; // (imageheight + tileheight-1)/tileheight;
+            unsigned int numtilesx = (imagewidth + tilewidth-1)/tilewidth;
+            unsigned int numtilesy = (imageheight + tileheight-1)/tileheight;
             unsigned int tileImageBufferSize = tilewidth * samplesperpixel * tileheight;
             unsigned char* tileImageBuffer = new unsigned char[tileImageBufferSize];
              std::cout << "Level " << level << " " << imagewidth << "x" << imageheight << std::endl;
