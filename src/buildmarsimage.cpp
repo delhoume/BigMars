@@ -103,7 +103,7 @@ main(int argc, char *argv[]) {
   int stepx = 4;
   int startx = -stepx * (numsrcx / 2); 
   int stepy = -4;
-  int starty = -stepy * (numsrcy / 2); 
+  int starty = -stepy * ((numsrcy  -1 )/ 2); 
 
   unsigned int dstwidth = numsrcx * srcwidth;
   unsigned int dstheight = numsrcy * srcheight;
