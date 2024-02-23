@@ -157,7 +157,7 @@ std::cout << outfilename << " " << to_string(dstwidth) << "x" << to_string(dsthe
         // for all cols
         const auto rtime = chrono::system_clock::now();
         // would doing this in parallel speed up things ?
-//#pragma omp parallel for
+#pragma omp parallel for
         for (unsigned int col = 0; col < numsrcx; ++col) {
           // compute pos in dstrow
           unsigned char *posindst = dstrow + col * srcwidth;
@@ -192,15 +192,15 @@ std::cout << outfilename << " " << to_string(dstwidth) << "x" << to_string(dsthe
           unsigned int remainingSecs = (dstheight - y) * rate;
 
           std::cout << std::setfill(' ') << std::setw(6) << (y + 1) << " / " << dstheight
-                    << " # " << std::setw(5) << (h + 1) << " / " << srcheight
-                    << " # " << (int)(ppercent * 100) << "%"
-                    << " # row N" << currow << " - " << "(" << (r + 1) << "/" << numsrcy << ")"
-                    << " # speed "  << std::setw(4) << differenceOneRowRead << "r/"  
+                    << "|" << std::setw(5) << (h + 1) << " / " << srcheight
+                    << "|" << (int)(ppercent * 100) << "%"
+                    << "|N" << currow << " - " << "(" << (r + 1) << "/" << numsrcy << ")"
+                    << "| speed "  << std::setw(4) << differenceOneRowRead << "r/"  
                     << std::setw(4) << differenceOneRowWrite << "w/" 
                     << std::setw(4) << differenceOneRow << "t/" 
                     << std::setw(4) << (unsigned int)(rate * 1000) << "a ms/row";
-          std::cout << " # elapsed: " << displayDuration(differenceFromStart);
-          std::cout << " #end :" << displayDuration(remainingSecs) << "/" <<  displayDuration(remainingFromCurrentPerf);
+          std::cout << "|elapsed " << displayDuration(differenceFromStart);
+          std::cout << "|end " << displayDuration(remainingSecs) << "/" <<  displayDuration(remainingFromCurrentPerf);
           std::cout << "           \r";
           std::cout.flush();
         }

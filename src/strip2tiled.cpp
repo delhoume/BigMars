@@ -204,10 +204,18 @@ int main(int argc, char *argv[]) {
 
 	TIFFSetField(tifout, TIFFTAG_TILEWIDTH, tilewidth);
 	TIFFSetField(tifout, TIFFTAG_TILELENGTH, tileheight);
-	
+	#if 1
+	numtilesx = imagewidth / tilewidth;
+	if (imagewidth % tilewidth)
+		++numtilesx;
+
+	numtilesy = imageheight / tileheight;
+	if (imageheight % tileheight)
+		++numtilesy;
+		#else
 	numtilesx = (imagewidth + tilewidth-1)/tilewidth;
 	numtilesy = (imageheight + tileheight-1)/tileheight;
-
+#endif
 	fprintf(stderr, "final size: %d x %d\n", imagewidth, imageheight);
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
@@ -223,7 +231,7 @@ int main(int argc, char *argv[]) {
 	TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, compression);
 	fprintf(stderr, "deflate compression: %d\n", compression);
 #endif
-    full_tile_width = imagewidth;
+    full_tile_width = numtilesx * tilewidth;
 	full_tile_data = (unsigned char *)malloc(tileheight * full_tile_width * samplesperpixel);
 	if (full_tile_data == 0) {
 		fprintf(stderr, "bad alloc: %ld bytes\n", tileheight * full_tile_width * samplesperpixel);
@@ -240,7 +248,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "  " << (row + 1) << " / " << numtilesy ;
 		std::cout.flush();
 
-//		memset(full_tile_data, 0, tileheight * full_tile_width * samplesperpixel);
+		memset(full_tile_data, 0, tileheight * full_tile_width * samplesperpixel);
 		for (unsigned int tiley = 0; tiley < tileheight; tiley++) {
 			if (current_strip < imageheight) {
 				// Read one strip

@@ -16,7 +16,7 @@ PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $
 	$(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom $(BINDIR)/check_full
 
 
-all:  $(PROGRAMS)
+all:  $(PROGRAMS) $(BINDIR)
 
 clean:
 	rm -rf *~ *# .??*
