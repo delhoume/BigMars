@@ -1,12 +1,11 @@
-This project is a guide for creating a **single TIFF file** and a Deep Zoom structure that will allow viewing interactively
-a gigantic (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
+This project is a guide for creating a **single TIFF file** (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
 
 The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
 to be able to view (zoom, unzoom, pan).
 
 This specially crafted pyramidal tiled TIFF can be opened with my Open Source software for Windows https://github.com/delhoume/vliv .
-The generated Deep Zoom structure can be served using any HTTP server and visualized with a browser thanks to the OpenSeaDragon project :
-https://openseadragon.github.io/
+It can be visualized locally with a browser thanks to the OpenSeaDragon project :
+https://openseadragon.github.io/ and my dedicated tile server **khufu** https://github.com/delhoume/khufu 
 
 The source for the data is https://murray-lab.caltech.edu/CTX/index.html
 
@@ -164,6 +163,8 @@ All these manual steps have been grouped into a script (second param is number o
 It can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
 for navigation
 
+See also https://github.com/delhoume/khufu for a simple way to visualize the image locally. 
+
 
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
 
@@ -232,10 +233,27 @@ when zooming.
 
 For more information on DeepZoom, a very good source is OpenSeaDragon Github, and https://www.gasi.ch/blog/inside-deep-zoom-2
 
+## Step 6 Deploy the image with only 4 files
 
+You do not need to create the very large Deep Zoom structure on disk to visualize your image, you can directly use the pyramidal T
+TIFF files as the source for the tiles.
 
+All you need are:
+ - the TIFF file
+ - an HTML with a specially defined OpenSeadragon TileSource
+ - the openseadragin.min.js runtime file
+ - the ```khufu```executable
 
+Clone khufu
+git clone https://github.com/delhoume/khufu.git
+cd khufu
+make
+cd <myimagesfolder>
+<khufufolder>/scripts/tiff2khufu <myimage>.tif
+cp <khufufolder>/openseadragon.min.js .
+<khufufolder>/bin/khhufu
 
+then open <myimagefolder>/<myimage>.html in a browser.
 
 
 
