@@ -241,19 +241,21 @@ TIFF files as the source for the tiles.
 All you need are:
  - the TIFF file
  - an HTML with a specially defined OpenSeadragon TileSource
- - the openseadragin.min.js runtime file
+ - the openseadragon.min.js runtime file
  - the ```khufu```executable
 
-Clone khufu
+```
 git clone https://github.com/delhoume/khufu.git
 cd khufu
+export KHUFUDIR=`pwd`
 make
-cd <myimagesfolder>
-<khufufolder>/scripts/tiff2khufu <myimage>.tif
-cp <khufufolder>/openseadragon.min.js .
-<khufufolder>/bin/khhufu
+cd $IMAGEFOLDER
+$KHUFUDIR/scripts/tiff2khufu <myimage>.tif
+cp <$KHUFUDIR/openseadragon.min.js .
+$KHUFUDIR/bin/khhufu
+```
 
-then open <myimagefolder>/<myimage>.html in a browser.
+then open $IMAGEFOLDER/<myimage>.html in a browser.
 
 
 
