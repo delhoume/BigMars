@@ -127,7 +127,7 @@ Next step swill see us generate images up to 90 times larger and 44 times higher
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
 The command ```bin/buildmarsimagetiled <out.tif> <cols> <rows>``` will generate a tiled TIFF mosaic given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than one hour.
+ you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than 15 minutes..
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
  You can change the folder where ZippedTiffs are to be found when building the commands in the source code
