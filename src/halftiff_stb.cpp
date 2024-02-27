@@ -125,14 +125,14 @@ int main(int argc, char* argv[]) {
 	unsigned int numtilesx = (imagewidth + tilewidth-1)/tilewidth;
 	unsigned int numtilesy = (imageheight + tileheight-1)/tileheight;
 #endif
-	if ((numtilesx == 1) || (numtilesy == 1)) {
+	if ( 0 && (numtilesx == 1) || (numtilesy == 1)) {
 		std::cout << "final image smaller than one tile, nothing to do" << endl;
 		TIFFClose(tifin);
 		return 1;
     }
 
 	std::cout << "tilesize: " << tilewidth << " x " << tileheight << endl;
- 	std::cout << "image tiled size: " << (numtilesx * tilewidth) << " x " << (numtilesx * tileheight)<< std::endl;
+ 	std::cout << "image tiled size: " << (numtilesx * tilewidth) << " x " << (numtilesy * tileheight)<< std::endl;
  	std::cout << "total tiles: " << ntiles << " (" << numtilesx << " x " << numtilesy << ")" << std::endl;
 	
     unsigned int newwidth = (imagewidth + 1) >> 1;

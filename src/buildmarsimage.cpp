@@ -83,17 +83,19 @@ private:
 
 int 
 main(int argc, char *argv[]) {
+  if (argc != 4) {
     std::cout << "Usage: buildmarsimage <out.tif> <cols> <rows>" << std::endl;
     std::cout << "       cols 1..90" << std::endl;   
     std::cout << "       rows 1..44" << std::endl;
-    std::cout << "       no arg means buildmarsimage mars_90_44_strip.tif 90 44" << std::endl;
     std::cout << "       fdelhoume 2024" << std::endl;
+    return 1;
+  }
 
   unsigned int srcwidth = 47420;
   unsigned int srcheight = 47420;
-  const char* outfilename = argc > 1 ? argv[1] : "mars_90_44_strip.tif";
-  unsigned int numsrcx = argc > 2 ? atoi(argv[2]) : 90;
-  unsigned int numsrcy = argc > 3 ? atoi(argv[3]) : 44;
+  const char* outfilename = argv[1];
+  unsigned int numsrcx = atoi(argv[2]);
+  unsigned int numsrcy = atoi(argv[3]);
 
   if (numsrcx > 90) numsrcx = 90;
   if (numsrcx < 1) numsrcx = 1;
@@ -123,9 +125,8 @@ std::cout << outfilename << " " << to_string(dstwidth) << "x" << to_string(dsthe
 
   TIFFSetField(tifout, TIFFTAG_ROWSPERSTRIP, 1);
 
-  // very little compression for fast output (at the cost of disk space)
   TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
-  TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_BEST_SPEED);
+  TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_BEST_COMPRESSION);
   // very important for performance for large images !
   TIFFSetField(tifout, TIFFTAG_PREDICTOR, PREDICTOR_NONE);
 

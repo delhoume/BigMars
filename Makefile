@@ -12,7 +12,7 @@ FOLDER = "/Volumes/My Book/BigMars"
 LIBS = /opt/homebrew/lib/libtiff.a  /opt/homebrew/lib/libturbojpeg.a \
     /opt/homebrew/lib/libz-ng.a /opt/homebrew/lib/libzlibstatic.a /opt/homebrew/lib/libzstd.a /opt/homebrew/lib/liblzma.a  -l gomp
 
-PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg \
+PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/buildmarsimagetiled $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg \
 	$(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom $(BINDIR)/check_full
 
 
@@ -34,6 +34,9 @@ $(BINDIR)/check_full: $(SRCDIR)/check_full.cpp
 
 $(BINDIR)/buildmarsimage: $(SRCDIR)/buildmarsimage.cpp 
 	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(FOLDER)\" $(SRCDIR)/buildmarsimage.cpp -o $(BINDIR)/buildmarsimage  $(LIBS)
+
+$(BINDIR)/buildmarsimagetiled: $(SRCDIR)/buildmarsimagetiled.cpp 
+	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(FOLDER)\" $(SRCDIR)/buildmarsimagetiled.cpp -o $(BINDIR)/buildmarsimagetiled  $(LIBS)
 
 $(BINDIR)/halftiff_stb: $(SRCDIR)/halftiff_stb.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/halftiff_stb.cpp -o $(BINDIR)/halftiff_stb  $(LIBS)

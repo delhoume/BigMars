@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
 #if defined(USE_JPEG)
-	unsigned int quality = 75;
+	unsigned int quality = 80;
 	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
 	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, quality);
 	fprintf(stderr, "jpeg quality: %d\n", quality);
