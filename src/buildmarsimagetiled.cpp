@@ -141,7 +141,7 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
 	std::cout << "final size: " << imagewidth << "x" << imageheight << std::endl;
 	std::cout << "tile size: " << tilewidth << "x" << tileheight << std::endl;
 	std::cout << "num tiles: "<< numtilesx << "x" <<  numtilesy << std::endl;
-
+    std::cout << "compression: "<< (useJPEG ? "JPEG" : "Deflate") << std::endl;
  if (useJPEG) {
         unsigned int quality = 80;
         TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
