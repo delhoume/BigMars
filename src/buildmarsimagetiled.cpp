@@ -21,10 +21,9 @@ extern "C" {
 #include <stb/stb_sprintf.h>
 
 // fdelhoume 2023
-// builds whole mars image (strip) from all 3960 individual tiffs
+// builds whole mars image (tiled) from all 3960 individual tiffs
 
-#define Z_MIDDLE_COMPRESSION 6
-
+// TODO -imagefolder in argments
 #if !defined(DEFAULT_FOLDER)
 #define DEFAULT_FOLDER "."
 #endif
@@ -55,50 +54,35 @@ std::string displayDuration(unsigned int seconds) {
   return str.str();
 }
 
-// Exponential moving Average to smooth variations on predicted remaining time
-class Ema
-{
-public:
-  Ema(float alpha) : _alpha(alpha) {}
-  float filter(float input)
-  {
-    if (_hasInitial)
-    {
-      _output = _alpha * (input - _output) + _output;
-    }
-    else
-    {
-      _output = input;
-      _hasInitial = true;
-    }
-    return _output;
-  }
-  void reset()
-  {
-    _hasInitial = true;
-  }
-
-private:
-  bool _hasInitial = false;
-  float _output = 0;
-  float _alpha = 0; //  Smoothing factor, in range [0,1]. Higher the value - less smoothing (higher the latest reading impact)
-};
-
 int 
 main(int argc, char *argv[]) {
-  if (argc != 4) {
-    std::cout << "Usage: buildmarsimage <out.tif> <cols> <rows>" << std::endl;
+        bool useJPEG = true;
+    int argsstart = 1;
+  if (argc == 1) {
+    std::cout << "Usage: buildmarsimage -folder <folder>  <out.tif> <cols> <rows>" << std::endl;
+    std::cout << "       folder is source TIFFs location" << std::endl;       
     std::cout << "       cols 1..90" << std::endl;   
     std::cout << "       rows 1..44" << std::endl;
     std::cout << "       fdelhoume 2024" << std::endl;
     return 1;
   }
-
+char folder[128];
+strcpy(folder, DEFAULT_FOLDER);
+for (int arg = 1; arg < argc; ++arg) {
+    if (!strcmp("-folder", argv[arg])) {
+        strcpy(folder, argv[arg + 1]);
+        argsstart += 2;
+        arg++;
+    } else if (!strcmp("-zip", argv[arg])) {
+        useJPEG = false;
+        argsstart++;
+    }
+}
   unsigned int srcwidth = 47420;
   unsigned int srcheight = 47420;
-  const char* outfilename = argv[1];
-  unsigned int numsrcx = atoi(argv[2]);
-  unsigned int numsrcy = atoi(argv[3]);
+  const char* outfilename = argv[argsstart];
+  unsigned int numsrcx = atoi(argv[argsstart + 1]);
+  unsigned int numsrcy = atoi(argv[argsstart + 2]);
 
   if (numsrcx > 90) numsrcx = 90;
   if (numsrcx < 1) numsrcx = 1;
@@ -127,18 +111,18 @@ unsigned int imagewidth = numsrcx * srcwidth;
          // try to allocate a complete row of tiles !! 
   unsigned int full_tile_width = numtilesx * tilewidth;
 
-std::cout << "allocating " << full_tile_width * tileheight << " bytes" << std::endl;
 	unsigned char *full_tile_data = new unsigned char[full_tile_width * tileheight];
-    std::cout << (full_tile_data ? "succeeded" : "failed") << std::endl;
-    if (!full_tile_data) return 1;
+    if (!full_tile_data) {
+      std::cout << "failed allocating " << full_tile_width * tileheight << " bytes" << std::endl;
+      return 1;
+    }
 
-std::cout << "allocating " << tilewidth * tileheight << " bytes" << std::endl;
 	unsigned char *tile_data = new unsigned char[tilewidth * tileheight];
-    std::cout << (tile_data ? "succeeded" : "failed") << std::endl;
-    if (!full_tile_data) return 1;
+     if (!full_tile_data) {
+      std::cout << "failed allocating " << tilewidth * tileheight << " bytes" << std::endl;
+      return 1;
+    }
 
-
-  Ema smoothRemainingSeconds(0.1);
 std::cout << std::setprecision(2);
 std::cout << "Starting from " << to_string(startx) << "  " << to_string(starty) <<  std::endl;
 std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(imageheight) << std::endl;
@@ -158,15 +142,13 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
 	std::cout << "tile size: " << tilewidth << "x" << tileheight << std::endl;
 	std::cout << "num tiles: "<< numtilesx << "x" <<  numtilesy << std::endl;
 
-    bool useJPEG = true;
-
  if (useJPEG) {
         unsigned int quality = 80;
         TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
         TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, quality);
     } else {
         TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
-        TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_BEST_COMPRESSION);
+        TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_BEST_SPEED);
         // very important for performance for large images !
         TIFFSetField(tifout, TIFFTAG_PREDICTOR, PREDICTOR_NONE);
     }
@@ -194,7 +176,7 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
       
         for (unsigned int xx = 0; xx < numsrcx; ++xx) {
             TIFFClose(tifrow[xx]);
-            const char *name = getName(starty + current_src_row * stepy, startx + xx * stepx);
+            const char *name = getName(starty + current_src_row * stepy, startx + xx * stepx, folder);
             std::cout << "Loading " << name << std::endl;
             tifrow[xx] = TIFFOpen(name, "r");
             if (tifrow[xx] == 0) {
@@ -205,6 +187,7 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
     }
     // fill one line at current tile y position from current y position in input row
     //std::cout << "taking strip " << current_src_strip << " in " << current_src_row - 1 << " to strip " << current_tile_y << " in tile " << current_tile_row << std::endl;
+ #pragma omp parallel for
     for (unsigned int xx = 0; xx < numsrcx; ++xx) {
         unsigned char* pos = full_tile_data +  current_tile_y * full_tile_width + xx * srcwidth;
         if (tifrow[xx]) {
@@ -221,7 +204,17 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
     // save eventually a row of tiles when complete or last y row
      current_tile_y++;
     if ((current_tile_y >= tileheight) || (y == (imageheight - 1))) { 
-        std::cout << "writing tile row " << (current_tile_row + 1) << " of " << numtilesy << " at line " << (y + 1) << " for " << current_src_row << " of " << imageheight <<   "     \r"; std::cout.flush();
+        std::cout << "writing tile row " << (current_tile_row + 1) << " of " << numtilesy << " at line " << (y + 1) << " of " << imageheight << " for " << current_src_row;
+            const auto ctime = chrono::system_clock::now();
+        const auto differenceFromStart = std::chrono::duration_cast<std::chrono::seconds>(ctime - stime).count();
+
+        float rate = differenceFromStart / (float)y;
+        unsigned int remainingSecs = (imageheight - y) * rate;
+    
+        std::cout  << "|elapsed " << displayDuration(differenceFromStart);
+        std::cout << "|predicted remaining time " << displayDuration(remainingSecs) <<    "                           \r";
+        std::cout.flush();
+
         // char buffer[32];
         // sprintf(buffer, "debug/row_%d.jpg", current_tile_row);
         // stbi_write_jpg(buffer, (int) full_tile_width, (int)tileheight, 1, full_tile_data, 80);
@@ -240,10 +233,7 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
         }
         current_tile_row++;
         current_tile_y = 0;
-    }
-    // std::cout << "   "  << (y + 1)  << "/" << imageheight << std::endl;
-    // std::cout.flush();
-  }
+    }}
     std::cout << std::endl;
     for (unsigned int t = 0; t < numsrcx; ++t)
         TIFFClose(tifrow[t]);
