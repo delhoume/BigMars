@@ -1,12 +1,11 @@
-This project is a guide for creating a **single TIFF file** and a Deep Zoom structure that will allow viewing interactively
-a gigantic (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
+This project is a guide for creating a **single TIFF file** (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
 
 The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
 to be able to view (zoom, unzoom, pan).
 
 This specially crafted pyramidal tiled TIFF can be opened with my Open Source software for Windows https://github.com/delhoume/vliv .
-The generated Deep Zoom structure can be served using any HTTP server and visualized with a browser thanks to the OpenSeaDragon project :
-https://openseadragon.github.io/
+It can be visualized locally with a browser thanks to the OpenSeaDragon project :
+https://openseadragon.github.io/ and my dedicated tile server **khufu** https://github.com/delhoume/khufu 
 
 The source for the data is https://murray-lab.caltech.edu/CTX/index.html
 
@@ -124,24 +123,21 @@ Next step swill see us generate images up to 90 times larger and 44 times higher
 
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
-While it is possible to write code that generates a tiled TIFF directly from the TIFFs processed at step 2, my strategy is to generate first a 
-one pixel per strip full image, then convert it to tiled.
-The command ```bin/buildmarsimage <out.tif> <cols> <rows>``` will generate a mosaic given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimage mars_4_4_strip.tif 4 4```  that will only take less than one hour.
+The command ```bin/buildmarsimagetiled <out.tif> <cols> <rows>``` will generate a tiled TIFF mosaic given a number of rows and columns.
+ you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than one hour.
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
  You can change the folder where ZippedTiffs are to be found when building the commands in the source code
  See variable FOLDER in the Makefile 
 
-We will create a so called pyramid, successive images with half width and height from previous one, until the dimension reach a screen viewable size or 1x1 pixel.
+We will create a so called pyramid (successive images with half width and height from previous one), until the dimension reach a screen viewable size or 1x1 pixel.
 Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory.
 
 The manual commands to build the pyramid are:
 
 ```
 mkdir -p temp/
-bin/strip2tiled.jpg mars_4_4_strip.tif temp/0.tif
-bin/hafltiff_stb temp/0.tif temp/1.tif
+bin/hafltiff_stb mars_4_4_tiled.tif temp/1.tif
 bin/hafltiff_stb temp/1.tif temp/2.tif
 bin/hafltiff_stb temp/2.tif temp/3.tif
 bin/hafltiff_stb temp/3.tif temp/4.tif
@@ -149,20 +145,23 @@ bin/hafltiff_stb temp/4.tif temp/5.tif
 bin/hafltiff_stb temp/5.tif temp/6.tif
 bin/hafltiff_stb temp/6.tif temp/7.tif
 bin/hafltiff_stb temp/7.tif temp/8.tif
-bin/tiffmerge.first temp/0.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/5.tif temp/6.tif temp/7.tif temp/8.tif mars_4_4_pyramid.tif
+bin/tiffmerge.first tmars_4_4_tiled.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/5.tif temp/6.tif temp/7.tif temp/8.tif mars_4_4_pyramid.tif
 ```
 
 ```temp/8.tif``` should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
-To display information on a TIFF file, use ```tiffinfo temp/5.tif``` 
+To display information on a TIFF file, use ```tiffinfo temp/8.tif``` 
 
 All these manual steps have been grouped into a script (second param is number of levels)
 
-```source scripts/generate_pyramid.sh mars_4_4_strip.tif 12```
+```source scripts/generate_pyramid.sh mars_4_4_tiled.tif 12```
+
+The generated image ```mars_4_4_pyrmid.tif``` can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
+for navigation
 
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
 
-It can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
-for navigation
+
+See also https://github.com/delhoume/khufu for a simple way to visualize the image locally. 
 
 
 The final pyramidal TIFF should weight no more than **1.33 times the full size image** thanks to mathematics (1 + 1/4 + 1/16 + ...)
@@ -170,7 +169,7 @@ The final pyramidal TIFF should weight no more than **1.33 times the full size i
 ## Step 4 Building the full multi-terapixel pyramidal image of Mars surface
 
 Once this is done, you may want to build the real deal, the full Mars surface image with
-```bin/buildmarsimage mars_90_44_strip.tif 90 44```
+```bin/buildmarsimagetiled mars_90_44_tiled.tif 90 44```
 
 Brace yourself, it will be days (week) long and will take a huge amount of disk space.
 
@@ -184,17 +183,15 @@ Depending on your machine load, disk drives speed, memory, they can differ much 
 Once you have the full 90x44 ```mars_90_44_strip.tif``` you follow the same process than for the smaller ones, converting to tiled, generating sublevels, merging.
 Processing time will be significantly higher as the full image is about 40 times larger...
 
-The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 6 Terabytes on disk,
- and yet **can be instantly opened in Vliv**
+The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 1 Terabyte on disk,
+with JPEG tile compression and yet **can be instantly opened in Vliv**
 
 **Please notify me if you got this far !**
 
 
 You can tweak the programs to change compression type or level, or whatever you can think of.
-You cannot for example have JPEG compressed strip TIFF with less than 8 rows per strip, and limit for JPEG is well below the width of the full Mars image
-(JPEG limits are 65535x65535 I think).
+
 Given the enormous amount of data, (de)compression levels can have a significant impact on processing time.
-I switch to JPEG TIFFs for tiled ones, giving a good performance and much reduced disk usage than Deflate ones.
 
 In the next step, we will see how to create a Deep Zoom layout, that will allow interactive (and impressive) visualization with a simple
 Web browser
@@ -232,10 +229,29 @@ when zooming.
 
 For more information on DeepZoom, a very good source is OpenSeaDragon Github, and https://www.gasi.ch/blog/inside-deep-zoom-2
 
+## Step 6 Deploy the image with only 4 files
 
+You do not need to create the very large Deep Zoom structure on disk to visualize your image, you can directly use the pyramidal T
+TIFF files as the source for the tiles.
 
+All you need are:
+ - the TIFF file
+ - an HTML with a specially defined OpenSeadragon TileSource
+ - the openseadragon.min.js runtime file
+ - the ```khufu```executable
 
+```
+git clone https://github.com/delhoume/khufu.git
+cd khufu
+export KHUFUDIR=`pwd`
+make
+cd $IMAGEFOLDER
+$KHUFUDIR/scripts/tiff2khufu <myimage>.tif
+cp <$KHUFUDIR/openseadragon.min.js .
+$KHUFUDIR/bin/khhufu
+```
 
+then open $IMAGEFOLDER/<myimage>.html in a browser.
 
 
 
