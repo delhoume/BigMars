@@ -127,13 +127,12 @@ Next step swill see us generate images up to 90 times larger and 44 times higher
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
 The command ```bin/buildmarsimagetiled <out.tif> <cols> <rows>``` will generate a tiled TIFF mosaic given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than 15 minutes..
+ you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take about 20 minutes..
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
- You can change the folder where ZippedTiffs are to be found when building the commands in the source code
- See variable FOLDER in the Makefile 
+ You can change the folder where ZippedTiffs are to be found withe the ```-folder <folder>``` argument and the compression with ```-zip```(default is Jpeg).
 
-We will create a so called pyramid (successive images with half width and height from previous one), until the dimension reach a screen viewable size or 1x1 pixel.
+We will then create a so called pyramid (successive images with half width and height from previous one), until the dimension reach a screen viewable size or 1x1 pixel.
 Even on ginormous TIFFs, if they are tiled, this can be done using almost no memory.
 
 The manual commands to build the pyramid are:
@@ -148,7 +147,7 @@ bin/hafltiff_stb temp/4.tif temp/5.tif
 bin/hafltiff_stb temp/5.tif temp/6.tif
 bin/hafltiff_stb temp/6.tif temp/7.tif
 bin/hafltiff_stb temp/7.tif temp/8.tif
-bin/tiffmerge.first tmars_4_4_tiled.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/5.tif temp/6.tif temp/7.tif temp/8.tif mars_4_4_pyramid.tif
+bin/tiffmerge.first mars_4_4_tiled.tif temp/1.tif temp/2.tif temp/3.tif temp/4.tif temp/5.tif temp/6.tif temp/7.tif temp/8.tif mars_4_4_pyramid.tif
 ```
 
 ```temp/8.tif``` should be 740x740 pixels, all intermediate levels TIFFs can be opened in Vliv.
