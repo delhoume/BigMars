@@ -1,5 +1,7 @@
 This project is a guide for creating a **single TIFF file** (**42678000 x 2086480 pixels**, that's a lot, at 8.9 terapixels) image of Mars surface.
 
+It is incredibly easy thanks to custom code.
+
 The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
 to be able to view (zoom, unzoom, pan).
 
@@ -114,6 +116,7 @@ because they must be fully loaded even if only a smart part  is visible on-scree
 
 **open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
+You can also generate a pyramidal TIFF to dislay in Vliv or in a local browser using **khufu** (see below step 6)
 
 You can try ```bin/strip2iled.zip``` that will create a lossless but much larger file.
 
@@ -124,7 +127,7 @@ Next step swill see us generate images up to 90 times larger and 44 times higher
 When you deal with such large images (or data) you have to mitigate the fact that you cannot load all in memory (by far).
 
 The command ```bin/buildmarsimagetiled <out.tif> <cols> <rows>``` will generate a tiled TIFF mosaic given a number of rows and columns.
- you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than one hour.
+ you can start with a modest ```bin/buildmarsimagetiled mars_4_4_tiled.tif 4 4```  that will only take less than 15 minutes..
  The image is always centered around E000 and N00 because imagery is much nicer than on borders, especially at poles.
 
  You can change the folder where ZippedTiffs are to be found when building the commands in the source code
@@ -153,9 +156,9 @@ To display information on a TIFF file, use ```tiffinfo temp/8.tif```
 
 All these manual steps have been grouped into a script (second param is number of levels)
 
-```source scripts/generate_pyramid.sh mars_4_4_tiled.tif 12```
+```source scripts/generate_pyramid.sh mars_4_4_tiled.tif```
 
-The generated image ```mars_4_4_pyrmid.tif``` can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
+The generated image ```mars_4_4_pyramid.tif``` can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
 for navigation
 
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
@@ -246,12 +249,12 @@ cd khufu
 export KHUFUDIR=`pwd`
 make
 cd $IMAGEFOLDER
-$KHUFUDIR/scripts/tiff2khufu <myimage>.tif
+$KHUFUDIR/scripts/tiff2khufu <myimage_pyramidal>.tif
 cp <$KHUFUDIR/openseadragon.min.js .
 $KHUFUDIR/bin/khhufu
 ```
 
-then open $IMAGEFOLDER/<myimage>.html in a browser.
+then open $IMAGEFOLDER/<myimage_pyramidal>.html in a browser.
 
 
 
