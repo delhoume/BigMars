@@ -38,11 +38,14 @@ int main(int argc, char* argv[]) {
       uint32_t tilewidth, tileheight;
 	  uint16_t bitspersample, samplesperpixel, compression, photometric, shortv;
       unsigned int x, y;
-      
+      const char* current_file = argv[idx];
       TIFF* tifin = TIFFOpen(argv[idx], "rm");
-	  if (!tifin) continue;
+	  if (!tifin) {
+		std::cout << "failed to open current file: " << current_file << endl;
+		continue;
+	  }
       tdata_t tilebuf = _TIFFmalloc(TIFFTileSize(tifin));
-      std::cout << "current file: " << argv[idx] << " (" << TIFFTileSize(tifin) << ")" << endl;
+      std::cout << "current file: " << current_file << " (tilesize: " << TIFFTileSize(tifin) << ")" << endl;
 	  
 	CopyField(TIFFTAG_TILEWIDTH, tilewidth);
 	CopyField(TIFFTAG_TILELENGTH, tileheight);
@@ -69,10 +72,19 @@ int main(int argc, char* argv[]) {
 		sampleinfo[0] = EXTRASAMPLE_UNASSALPHA;
 		TIFFSetField(tifout, TIFFTAG_EXTRASAMPLES, 1, sampleinfo);
 	 }
+	unsigned int numtilesx = imagewidth / tilewidth;
+	if (imagewidth % tilewidth)
+		++numtilesx;
+
+	unsigned int numtilesy = imageheight / tileheight;
+	if (imageheight % tileheight)
+		++numtilesy;
 
 	 std::cout << "size: " << imagewidth << "x" << imageheight << endl;
-	 std::cout << "tiles size: " << tilewidth << "x" << tileheight << endl;
-	  
+	 std::cout << "tiles size: " << tilewidth << "x" << tileheight << endl;	 
+	 std::cout << "tiles: " << numtilesx << "x" << numtilesy << endl;
+	 std::cout << "image tiled size: " << (numtilesx * tilewidth) << " x " << (numtilesy * tileheight)<< std::endl;
+ 
 	  std::cout << idx << " ";
 
       if (((idx == 1) && fullresfirst) || ((idx == nimages) && !fullresfirst)) {
@@ -97,6 +109,25 @@ int main(int argc, char* argv[]) {
 		  }
 		  break;
 	}
+
+#if 1
+	for (unsigned int y = 0; y < numtilesy; ++y) {
+		for (unsigned int x = 0; x < numtilesx; ++x) {
+			uint32_t tilenum = TIFFComputeTile(tifin, x * tilewidth, y * tileheight, 0, 0);
+		//	tsize_t numbytes = TIFFReadRawTile(tifin, tilenum, tilebuf, TIFFTileSize(tifin));
+			tsize_t numbytes = TIFFReadEncodedTile(tifin, tilenum, tilebuf, TIFFTileSize(tifin));
+			if (numbytes == -1) 
+					std::cout << "Error for " << x << ":" << y << endl;
+			if (numbytes > TIFFTileSize(tifin))
+					std::cout << "Readbytes " << numbytes <<  " at " << x << "x" << y  << "is larger than " << TIFFTileSize(tifin) << endl;
+			tilenum = TIFFComputeTile(tifout, x * tilewidth, y * tileheight, 0, 0);
+			//TIFFWriteRawTile(tifout, tilenum, tilebuf, numbytes);
+			TIFFWriteEncodedTile(tifout, tilenum, tilebuf, numbytes);
+		}
+		std::cout << "   row " << (y + 1) << "/" << numtilesy << "                \r" ;
+		std::cout.flush();
+	}
+#else
 	unsigned int current_row = 0;
 	unsigned int numrows = imageheight / tileheight;
 	if (imageheight % tileheight) numrows++;
@@ -108,14 +139,19 @@ int main(int argc, char* argv[]) {
 							 TIFFComputeTile(tifin, x, y, 0, 0), 
 							 tilebuf, 
 							 TIFFTileSize(tifin));
-			  //	      std::cout << "numbytes for " << x << ":" << y << " = " << numbytes << endl;
+			if (numbytes == -1) 
+  					std::cout << "Error for " << x << ":" << y << endl;
+			if (numbytes > TIFFTileSize(tifin))
+					std::cout << "Readbytes " << numbytes <<  " at " << x << "x" << y  << "is larger than " << TIFFTileSize(tifin) << endl;
 			  TIFFWriteRawTile(tifout, TIFFComputeTile(tifout, x, y, 0, 0), tilebuf, numbytes);
 		  }
       }
-      _TIFFfree(tilebuf);
+#endif
       TIFFWriteDirectory(tifout);
       TIFFClose(tifin);
-    }
+      _TIFFfree(tilebuf);    
+	}    
+	TIFFClose(tifout);
     std::cout << endl << "Done" << endl;
-    TIFFClose(tifout);
+	return 0;
 }

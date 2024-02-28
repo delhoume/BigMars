@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 	unsigned int numtilesx = (imagewidth + tilewidth-1)/tilewidth;
 	unsigned int numtilesy = (imageheight + tileheight-1)/tileheight;
 #endif
-	if ( 0 && (numtilesx == 1) || (numtilesy == 1)) {
+	if ((numtilesx == 1) && (numtilesy == 1)) {
 		std::cout << "final image smaller than one tile, nothing to do" << endl;
 		TIFFClose(tifin);
 		return 1;

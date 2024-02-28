@@ -21,7 +21,7 @@ echo "Levels: " $LEVELS
 # create first level in temp
 $BIGMARS_DIR/bin/halftiff_stb $INPUT $TEMP_FOLDER/$BASEINPUT$TEMP_SUFFIX$FIRST$EXT
 
-for i in `seq 0 $NUMLEVELS` 
+for i in `seq 1 $NUMLEVELS` 
 do
      echo $i $LEVELS
      OLDFILE=$TEMP_FOLDER/$BASEINPUT$TEMP_SUFFIX$i$EXT
