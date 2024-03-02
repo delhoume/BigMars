@@ -59,7 +59,7 @@ Sources are in src, compiled binaries in bin.
 Dependencies can be installed with the ```brew``` command (https://brew.sh/).
 In a terminal (I recommend **iTerm**), in the BigMars clone repository folder, type:
 
-```brew install gcc libtiff jpeg-turbo zlib-ng zstd lzma curl sevenzip parallel http-server```
+```brew install gcc libtiff jpeg-turbo zlib-ng zstd lzma curl sevenzip parallel http-server vips```
 
 once all is installed
 
@@ -160,6 +160,10 @@ All these manual steps have been grouped into a script (second param is number o
 The generated image ```mars_4_4_pyramid.tif``` can be opened in Vliv that will leverage its fully tiled pyramidal structure. Note also that Vliv supports a joystick
 for navigation
 
+I may be easier and faster to use **vips** to generate the pyramid:
+```vips copy mars_4_4_tiled.tif mars_4_4_pyramid.tif[compression=jpeg,tile,pyramid]````
+
+
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
 
 
@@ -175,14 +179,11 @@ Once this is done, you may want to build the real deal, the full Mars surface im
 
 Brace yourself, it will be days (week) long and will take a huge amount of disk space.
 
-I have yet to finish a complete build, so far it is running for 3 days and estimated remaining time is 2 days.
+I have yet to finish a complete build, so far it is running for 4 days and estimated remaining time is 1 day.
 Final running  time is notoriously hard to predict (just think about a Windows copy dialog with a large number of various sized files,
 the estimation for completion can vary very much).
-I display 2 estimates, one that, given the number of completed rows since the start, computes an average per row time and applys it to remaining rows, the other
-based on instant row performance if sustained for the remaining rows.
-Depending on your machine load, disk drives speed, memory, they can differ much but should converge at the very end...
 
-Once you have the full 90x44 ```mars_90_44_strip.tif``` you follow the same process than for the smaller ones, converting to tiled, generating sublevels, merging.
+Once you have the full 90x44 ```mars_90_44_tiled.tif``` you follow the same process than for the smaller ones,generating sublevels, merging.
 Processing time will be significantly higher as the full image is about 40 times larger...
 
 The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 1 Terabyte on disk,
@@ -201,7 +202,7 @@ Web browser
 ## Step 5 Building a Deep Zoom structure for interactive visualization over HTTP
 
 The Deep Zoom distribution system has exactly the same layout as pyramidal TIFFs (precomputed zoom levels,
-each organized as tiles. But instead of having all in a single TIFF, Deep Zoom uses individual files for each tile,
+each organized as tiles). But instead of having all tiles and levels in a single TIFF, Deep Zoom uses individual files for each tile,
 layed out in a one folder per zoom level disk hierarchy.
 
 There are a number of utilities that will generate this structure from a source image, but as it is very easy to create it from
@@ -211,7 +212,7 @@ I can however recommend the great https://www.libvips.org/ if you look for alter
 ```source scripts/generate_deepzoom.sh mars_40_40_pyramid.tif```
 
 After a while you should have all tiles (that can be a huge number) as JPEGs in some of the sub-folders (not all of them might have content, 
-depending on what levels are in the source TIFF.
+depending on what levels are in the source TIFF).
 
 The script also creates a .HTML file and a .DZI, so all you have to do is launch a local HTTP server:
 ```http-server```
