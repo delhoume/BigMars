@@ -161,7 +161,7 @@ The generated image ```mars_4_4_pyramid.tif``` can be opened in Vliv that will l
 for navigation
 
 I may be easier and faster to use **vips** to generate the pyramid:
-```vips copy mars_4_4_tiled.tif mars_4_4_pyramid.tif[compression=jpeg,tile,pyramid]````
+```vips copy mars_4_4_tiled.tif mars_4_4_pyramid.tif[compression=jpeg,tile_size=512,tile,pyramid]````
 
 
 ![Vliv displaying various regions and zooms for mars_40_40_pyramid.tif ](images/mosaic.png)
