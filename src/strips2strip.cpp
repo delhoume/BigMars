@@ -195,7 +195,7 @@ int main(int argc, char* argv[]) {
 
     TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE); 
 	// temporary images only...
-    TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_NO_COMPRESSION);
+    TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, Z_BEST_SPEED);
 
     TIFFSetField(tifout, TIFFTAG_ROWSPERSTRIP, 1);
 

@@ -24,7 +24,6 @@ extern "C" {
 #include <stb/stb_sprintf.h>
 
 // fdelhoume 2023
-// builds whole mars image (tiled) from all 3960 individual tiffs
 
 // TODO -imagefolder in argments
 #if !defined(DEFAULT_FOLDER)
@@ -32,13 +31,8 @@ extern "C" {
 #endif
 
 static char buff[256];
-const char *getName(int row, int col, const char* folder = DEFAULT_FOLDER) {
-  snprintf(buff,
-           sizeof(buff),
-           "%s/ZippedTiffs/MurrayLab_CTX_V01_E%s%03d_N%s%02d_Mosaic.tif",
-           folder,
-           (col < 0 ? "-" : ""), abs(col),
-           (row < 0 ? "-" : ""), abs(row));
+const char *getName(int row, int col, int columns, const char* folder = DEFAULT_FOLDER) {
+  snprintf(buff, sizeof(buff), "%s/grid/%.2d.png", folder, col + row * columns);
   return buff;
 }
 
@@ -62,11 +56,11 @@ main(int argc, char *argv[]) {
         bool useJPEG = true;
     int argsstart = 1;
   if (argc == 1) {
-    std::cout << "Usage: buildmarsimage -folder <folder>  <out.tif> <cols> <rows>" << std::endl;
-    std::cout << "       folder is source TIFFs location" << std::endl;       
-    std::cout << "       cols 1..90" << std::endl;   
-    std::cout << "       rows 1..44" << std::endl;
-    std::cout << "       fdelhoume 2024" << std::endl;
+    std::cout << "Usage: build_jacotin_pages -folder <folder>  <out.tif> <cols> <rows>" << std::endl;
+    std::cout << "       folder is source PNGs location" << std::endl;       
+    std::cout << "       cols 1..8" << std::endl;   
+    std::cout << "       rows 1..6s" << std::endl;
+    std::cout << "       delhoume@gmail.com 2024" << std::endl;
     return 1;
   }
 
@@ -85,21 +79,17 @@ for (int arg = 1; arg < argc; ++arg) {
         argsstart++;
     }
 }
-  unsigned int srcwidth = 47420;
-  unsigned int srcheight = 47420;
+
+
+  unsigned int srcwidth = 13000;
+  unsigned int srcheight = 8700;
+  unsigned int bpp = 3;
+
+
   const char* outfilename = argv[argsstart];
   unsigned int numsrcx = atoi(argv[argsstart + 1]);
   unsigned int numsrcy = atoi(argv[argsstart + 2]);
 
-  if (numsrcx > 90) numsrcx = 90;
-  if (numsrcx < 1) numsrcx = 1;
-  if (numsrcy > 44) numsrcy = 44;
-  if (numsrcy < 1) numsrcy = 1;
-
-  int stepx = 4;
-  int startx = -stepx * (numsrcx / 2); 
-  int stepy = -4;
-  int starty = -stepy * ((numsrcy  -1 )/ 2); 
 
     unsigned int tilewidth = 512;
     unsigned int tileheight = tilewidth;
@@ -118,20 +108,18 @@ unsigned int imagewidth = numsrcx * srcwidth;
          // try to allocate a complete row of tiles !! 
   unsigned int full_tile_width = numtilesx * tilewidth;
 
-	unsigned char *full_tile_data = new unsigned char[full_tile_width * tileheight];
+	unsigned char *full_tile_data = new unsigned char[full_tile_width * tileheight * bpp];
     if (!full_tile_data) {
-      std::cout << "failed allocating " << full_tile_width * tileheight << " bytes" << std::endl;
+      std::cout << "failed allocating " << full_tile_width * tileheight * bpp << " bytes" << std::endl;
       return 1;
     }
-
-	unsigned char *tile_data = new unsigned char[tilewidth * tileheight];
+	unsigned char *tile_data = new unsigned char[tilewidth * tileheight * bpp];
      if (!full_tile_data) {
-      std::cout << "failed allocating " << tilewidth * tileheight << " bytes" << std::endl;
+      std::cout << "failed allocating " << tilewidth * tileheight * bpp << " bytes" << std::endl;
       return 1;
     }
 
 std::cout << std::setprecision(2);
-std::cout << "Starting from " << to_string(startx) << "  " << to_string(starty) <<  std::endl;
 std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(imageheight) << std::endl;
   // create dst image, open as BigTIFF (obviously)
   TIFF *tifout = TIFFOpenExt(outfilename, "w8", opts);
@@ -143,9 +131,11 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
   TIFFSetField(tifout, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
   TIFFSetField(tifout, TIFFTAG_BITSPERSAMPLE, 8);
   TIFFSetField(tifout, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-
+  TIFFSetField(tifout,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
   	TIFFSetField(tifout, TIFFTAG_TILEWIDTH, tilewidth);
 	TIFFSetField(tifout, TIFFTAG_TILELENGTH, tileheight);
+
+  TIFFSetField(tifout, TIFFTAG_SAMPLESPERPIXEL, bpp);
 
 	std::cout << "final size: " << imagewidth << "x" << imageheight << std::endl;
 	std::cout << "tile size: " << tilewidth << "x" << tileheight << std::endl;
@@ -163,47 +153,45 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
         TIFFSetField(tifout, TIFFTAG_PREDICTOR, PREDICTOR_NONE);
     }
 
-  TIFFSetField(tifout, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-  TIFFSetField(tifout, TIFFTAG_SAMPLESPERPIXEL, 1);
   // estimation of remaining time
   auto stime = std::chrono::system_clock::now();
  
-  TIFF **tifrow = new TIFF *[numsrcx];
+ unsigned char** sources  = new unsigned char*[numsrcx];
   for (unsigned int t = 0; t < numsrcx; ++t)
-    tifrow[t] = 0;
+    sources[t] = 0;
   
   unsigned int tilex = 0;
   unsigned int tiley = 0;
   unsigned int current_src_row = 0; // index of current bigpart (0 to numsrcy)
   unsigned int current_tile_row = 0; // index of current y  tile (0 to numtilesy)
-    unsigned int current_tile_y = 0; // index in current tile (0 to tileheight)
+  unsigned int current_tile_y = 0; // index in current tile (0 to tileheight)
   unsigned int current_src_strip = 0; // strip in current bigpart (0 to srcheight)
 
 
   for (unsigned int y = 0; y < imageheight; ++y) {
     if (current_src_strip == 0) {
         std::cout << std::endl << "loading new sources for input " << current_src_row << " at line " << y << std::endl;
-      
         for (unsigned int xx = 0; xx < numsrcx; ++xx) {
-            TIFFClose(tifrow[xx]);
-            const char *name = getName(starty + current_src_row * stepy, startx + xx * stepx, folder);
-            std::cout << "Loading " << name << std::endl;
-            tifrow[xx] = TIFFOpen(name, "r");
-            if (tifrow[xx] == 0) {
+           if (sources[xx]) stbi_image_free(sources[xx]);
+            const char *name = getName(current_src_row, xx, numsrcx, folder);
+            std::cout << ".";
+            int xi, yi, ni;
+            sources[xx] = stbi_load(name, &xi, &yi, &ni, 0);
+            if (sources[xx] == 0) {
                 std::cout << std::endl << "Tile " << name << " not found" << std::endl;
             } 
+//           stbi_write_jpg("toto.jpg", xi, yi, ni, sources[xx], 80);
         }
         current_src_row++;
+        std::cout << std::endl ;
     }
     // fill one line at current tile y position from current y position in input row
-    //std::cout << "taking strip " << current_src_strip << " in " << current_src_row - 1 << " to strip " << current_tile_y << " in tile " << current_tile_row << std::endl;
- #pragma omp parallel for
     for (unsigned int xx = 0; xx < numsrcx; ++xx) {
-        unsigned char* pos = full_tile_data +  current_tile_y * full_tile_width + xx * srcwidth;
-        if (tifrow[xx]) {
-            tsize_t rb = TIFFReadEncodedStrip(tifrow[xx], current_src_strip, pos, -1);
+        unsigned char* pos = full_tile_data +  current_tile_y * full_tile_width * bpp + xx * srcwidth * bpp;
+        if (sources[xx]) {
+           memcpy(pos, sources[xx] + srcwidth * bpp * current_src_strip, srcwidth * bpp);
         } else {
-            memset(pos, ((y % 256) + (xx % 256)) % 256, srcwidth);
+   //         memset(pos, ((y % 256) + (xx % 256)) % 256, srcwidth);
         }
     }
        
@@ -227,26 +215,28 @@ std::cout << outfilename << " " << to_string(imagewidth) << "x" << to_string(ima
 
         // char buffer[32];
         // sprintf(buffer, "debug/row_%d.jpg", current_tile_row);
-        // stbi_write_jpg(buffer, (int) full_tile_width, (int)tileheight, 1, full_tile_data, 80);
+        // stbi_write_jpg(buffer, (int) full_tile_width, (int)tileheight, bpp, full_tile_data, 80);
         for (unsigned int xt = 0; xt < numtilesx; ++xt) {
             // now copy from full to single
-			unsigned char *startx = full_tile_data + xt * tilewidth;
+			unsigned char *startx = full_tile_data + xt * tilewidth * bpp;
 			for (unsigned int crow = 0; crow < tileheight; ++crow) {
-				memcpy(tile_data + crow * tilewidth, startx + full_tile_width * crow, tilewidth);
+				memcpy(tile_data + crow * tilewidth * bpp, startx + full_tile_width * bpp * crow, tilewidth * bpp);
 			}
              TIFFWriteEncodedTile(tifout,
                                 TIFFComputeTile(tifout,
                                                     xt * tilewidth,
                                                     current_tile_row * tileheight,
                                                     0, 0),
-                                                    tile_data, tilewidth * tileheight);
+                                                    tile_data, tilewidth * tileheight * bpp);
         }
         current_tile_row++;
         current_tile_y = 0;
     }}
     std::cout << std::endl;
-    for (unsigned int t = 0; t < numsrcx; ++t)
-        TIFFClose(tifrow[t]);
+    for (unsigned int t = 0; t < numsrcx; ++t) {
+        if (sources[t]) stbi_image_free(sources[t]);
+    } 
+    delete[] sources;
     TIFFFlush(tifout);
  
     TIFFClose(tifout);

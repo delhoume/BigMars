@@ -9,7 +9,6 @@ using namespace std;
 #include <stb/stb_image_write.h>
 
 bool debug = false;
-
 unsigned int tilewidth = 512;
 unsigned int tileheight = 512;
 
@@ -27,35 +26,25 @@ unsigned int tileheight = 512;
 	TIFFSetField(tifout, tag, v1, v2, v3, v4)
 
 static void
-cpTag(TIFF *tifin, TIFF *tifout, uint16_t tag, uint16_t count, TIFFDataType type)
-{
-	switch (type)
-	{
+cpTag(TIFF *tifin, TIFF *tifout, uint16_t tag, uint16_t count, TIFFDataType type) {
+	switch (type) {
 	case TIFF_SHORT:
-		if (count == 1)
-		{
+		if (count == 1)		{
 			uint16_t shortv;
 			CopyField(tag, shortv);
-		}
-		else if (count == 2)
-		{
+		}else if (count == 2){
 			uint16_t shortv1, shortv2;
 			CopyField2(tag, shortv1, shortv2);
-		}
-		else if (count == 4)
-		{
+		}else if (count == 4) {
 			uint16_t *tr, *tg, *tb, *ta;
 			CopyField4(tag, tr, tg, tb, ta);
-		}
-		else if (count == (uint16_t)-1)
-		{
+		}	else if (count == (uint16_t)-1)	{
 			uint16_t shortv1;
 			uint16_t *shortav;
 			CopyField2(tag, shortv1, shortav);
 		}
 		break;
-	case TIFF_LONG:
-	{
+	case TIFF_LONG:	{
 		uint32_t longv;
 		CopyField(tag, longv);
 	}
@@ -76,13 +65,10 @@ cpTag(TIFF *tifin, TIFF *tifout, uint16_t tag, uint16_t count, TIFFDataType type
 	}
 	break;
 	case TIFF_DOUBLE:
-		if (count == 1)
-		{
+		if (count == 1)	{
 			double doublev;
 			CopyField(tag, doublev);
-		}
-		else if (count == (uint16_t)-1)
-		{
+		} else if (count == (uint16_t)-1){
 			double *doubleav;
 			CopyField(tag, doubleav);
 		}
@@ -94,8 +80,7 @@ cpTag(TIFF *tifin, TIFF *tifout, uint16_t tag, uint16_t count, TIFFDataType type
 	}
 }
 
-static const struct cpTag
-{
+static const struct cpTag {
 	uint16_t tag;
 	uint16_t count;
 	TIFFDataType type;
@@ -106,6 +91,7 @@ static const struct cpTag
 	{TIFFTAG_IMAGEDESCRIPTION, 1, TIFF_ASCII},
 	{TIFFTAG_MAKE, 1, TIFF_ASCII},
 	{TIFFTAG_MODEL, 1, TIFF_ASCII},
+	{TIFFTAG_COPYRIGHT, 1, TIFF_ASCII},
 	{TIFFTAG_MINSAMPLEVALUE, 1, TIFF_SHORT},
 	{TIFFTAG_MAXSAMPLEVALUE, 1, TIFF_SHORT},
 	{TIFFTAG_XRESOLUTION, 1, TIFF_RATIONAL},
@@ -183,7 +169,7 @@ int main(int argc, char *argv[]) {
 		TIFFClose(tifin);
 		return 0;
 	}
-	cout << "size: " << imagewidth << " x " << imageheight << endl
+	cout << "banana size: " << imagewidth << " x " << imageheight << endl
 		 << "samples per pixel: " << samplesperpixel << endl
 		 << "bits per sample: " << bitspersample << endl
 	     << "rows per strip: " <<  rows_per_strip << endl;
@@ -204,7 +190,7 @@ int main(int argc, char *argv[]) {
 
 	TIFFSetField(tifout, TIFFTAG_TILEWIDTH, tilewidth);
 	TIFFSetField(tifout, TIFFTAG_TILELENGTH, tileheight);
-	#if 1
+#if 1
 	numtilesx = imagewidth / tilewidth;
 	if (imagewidth % tilewidth)
 		++numtilesx;
@@ -212,15 +198,17 @@ int main(int argc, char *argv[]) {
 	numtilesy = imageheight / tileheight;
 	if (imageheight % tileheight)
 		++numtilesy;
-		#else
+#else
 	numtilesx = (imagewidth + tilewidth-1)/tilewidth;
 	numtilesy = (imageheight + tileheight-1)/tileheight;
 #endif
 	fprintf(stderr, "final size: %d x %d\n", imagewidth, imageheight);
 	fprintf(stderr, "tile size: %d x %d\n", tilewidth, tileheight);
+	fprintf(stderr, "tile total size: %d x %d\n", tilewidth * numtilesx, tileheight * numtilesy);
 	fprintf(stderr, "num tiles: %d x %d\n", numtilesx, numtilesy);
 #if defined(USE_JPEG)
 	unsigned int quality = 80;
+	TIFFSetField(tifout, TIFFTAG_JPEGTABLESMODE, 0);
 	TIFFSetField(tifout, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
 	TIFFSetField(tifout, TIFFTAG_JPEGQUALITY, quality);
 	fprintf(stderr, "jpeg quality: %d\n", quality);
@@ -231,7 +219,7 @@ int main(int argc, char *argv[]) {
 	TIFFSetField(tifout, TIFFTAG_ZIPQUALITY, compression);
 	fprintf(stderr, "deflate compression: %d\n", compression);
 #endif
-    full_tile_width = numtilesx * tilewidth;
+    full_tile_width = numtilesx * tilewidth;    
 	full_tile_data = (unsigned char *)malloc(tileheight * full_tile_width * samplesperpixel);
 	if (full_tile_data == 0) {
 		fprintf(stderr, "bad alloc: %ld bytes\n", tileheight * full_tile_width * samplesperpixel);
@@ -241,6 +229,10 @@ int main(int argc, char *argv[]) {
 	unsigned int current_strip = 0;
 	char buffer[128];
 
+	unsigned int hidden_pixels_width = full_tile_width - imagewidth;
+			if (hidden_pixels_width> 0) {
+				cout << "we'll have "<< hidden_pixels_width << " pixels to fill for each row" << endl;
+			}
 
 	std::cout << "Saving " << to_string(numtilesy) << "rows"; 
 
@@ -248,24 +240,50 @@ int main(int argc, char *argv[]) {
 		std::cout << "  " << (row + 1) << " / " << numtilesy ;
 		std::cout.flush();
 
-		memset(full_tile_data, 0, tileheight * full_tile_width * samplesperpixel);
+#if 1
+		memset(full_tile_data, 255, tileheight * full_tile_width * samplesperpixel);
+#else
+		for (unsigned r = 0; r < tileheight; ++r) {
+            unsigned char *startrow = full_tile_data + r * samplesperpixel * full_tile_width;
+            for (unsigned int c = 0; c < full_tile_width; ++c)  {
+				for (unsigned int s = 0; s < samplesperpixel; ++s) {
+               	    startrow[c * samplesperpixel + s] = (unsigned char)(c / (float)full_tile_width * 256) % 256;
+ 				}
+            }
+        }
+#endif
+
+		unsigned int good_strip = 0;
 		for (unsigned int tiley = 0; tiley < tileheight; tiley++) {
-			if (current_strip < imageheight) {
 				// Read one strip
-				TIFFReadEncodedStrip(tifin, current_strip, full_tile_data + full_tile_width * tiley * samplesperpixel, imagewidth * samplesperpixel);
+			unsigned char* rowdst = full_tile_data + full_tile_width * tiley * samplesperpixel;
+			if (current_strip < imageheight) {
+				TIFFReadEncodedStrip(tifin, current_strip, rowdst, imagewidth * samplesperpixel);
+				good_strip++;
+				if (hidden_pixels_width > 0) {
+					unsigned char* lastpos = rowdst + samplesperpixel * (imagewidth - 1);
+				//	cout << (unsigned int)lastpos[0] << " " << (unsigned int)lastpos[1] << " "<< (unsigned int)lastpos[2] << endl; 
+					for (unsigned int pixel = 0; pixel < hidden_pixels_width; ++pixel) {
+						memcpy(lastpos + pixel * samplesperpixel, lastpos, samplesperpixel);
+					}
+				}
+			} else {
+				// copy last one
+				memcpy(rowdst, full_tile_data + full_tile_width * (good_strip - 1) * samplesperpixel, full_tile_width * samplesperpixel);
 			}
+			// repeat last pixel (to make halftiff work fine when there is data after the width / height limit)
 			current_strip++;
 		}
 		// done reading
 		std::cout << "r";
 		std::cout.flush();
 
-		if (debug) {
-			sprintf(buffer, "debug/row_%d.jpg", row);
-			stbi_write_jpg(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 80);
+		if (debug && (row > (numtilesy - 10))) {
+			sprintf(buffer, "debug/row_%d.png", row);
+			stbi_write_png(buffer,(int) full_tile_width, (int)tileheight, samplesperpixel, full_tile_data, 0);
 		}
 
-
+		memset(tile_data, 255, samplesperpixel * tilewidth * tileheight);
 		for (unsigned int col = 0; col < numtilesx; ++col) {
 			// now copy
 			unsigned char *startx = full_tile_data + col * tilewidth * samplesperpixel;
@@ -274,9 +292,9 @@ int main(int argc, char *argv[]) {
 			for (unsigned int crow = 0; crow < tileheight; ++crow) {
 				memcpy(tile_data + samplesperpixel * tilewidth * crow, startx + offset * crow, tilewidth * samplesperpixel);
 			}
-			if (debug) {
-				sprintf(buffer, "debug/row_%d_col_%d.jpg", row, col);
-				stbi_write_jpg(buffer, (int)tilewidth, (int)tileheight, samplesperpixel, tile_data, 80);
+			if (0 && debug) {
+				sprintf(buffer, "debug/row_%d_col_%d.png", row, col);
+				stbi_write_png(buffer, (int)tilewidth, (int)tileheight, samplesperpixel, tile_data, 0);
 			}
 			//write the tile
 			TIFFWriteEncodedTile(tifout,
@@ -286,6 +304,7 @@ int main(int argc, char *argv[]) {
 												 0, 0),
 								 tile_data, samplesperpixel * tilewidth * tileheight);
 		}
+	
 		// all current row tiles written
 		std::cout << "w                      \r";
 		std::cout.flush();

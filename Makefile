@@ -5,15 +5,15 @@ CCC=/opt/homebrew/bin/g++-13
 
 CCFLAGS = -std=c++11 -O3 -fopenmp -I /opt/homebrew/include -I src
 
-THREADS=8
-
 FOLDER = "/Volumes/My Book/BigMars"
+BARRY_FOLDER = "/Volumes/My Book/CinemaRedux"
+JACOTIN_FOLDER = "/Users/fredericdelhoume/Downloads/Egypte"
 
-LIBS = /opt/homebrew/lib/libtiff.a  /opt/homebrew/lib/libturbojpeg.a \
-    /opt/homebrew/lib/libz-ng.a /opt/homebrew/lib/libzlibstatic.a /opt/homebrew/lib/libzstd.a /opt/homebrew/lib/liblzma.a  -l gomp
+LIBS += -L /opt/homebrew/lib -ltiff -lturbojpeg -lz-ng -lz -lzstd -llzma
 
-PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimage $(BINDIR)/buildmarsimagetiled $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg \
-	$(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom $(BINDIR)/check_full
+
+PROGRAMS = $(BINDIR)/check_all $(BINDIR)/buildmarsimagetiled $(BINDIR)/buildmarsimagetiled $(BINDIR)/halftiff_stb $(BINDIR)/strip2tiled.zip $(BINDIR)/strip2tiled.jpg \
+	$(BINDIR)/tiffmerge.first $(BINDIR)/pyramid2deepzoom $(BINDIR)/check_full $(BINDIR)/build_barry_lyndon $(BINDIR)/build_jacotin_pages
 
 
 all:  $(PROGRAMS) $(BINDIR)
@@ -52,3 +52,11 @@ $(BINDIR)/tiffmerge.first: $(SRCDIR)/tiffmerge.cpp
 
 $(BINDIR)/pyramid2deepzoom: $(SRCDIR)/pyramid2deepzoom.cpp
 	$(CCC) $(CCFLAGS) $(SRCDIR)/pyramid2deepzoom.cpp -o $(BINDIR)/pyramid2deepzoom $(LIBS)
+
+
+$(BINDIR)/build_barry_lyndon: $(SRCDIR)/build_barry_lyndon.cpp 
+	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(BARRY_FOLDER)\" $(SRCDIR)/build_barry_lyndon.cpp -o $(BINDIR)/build_barry_lyndon  $(LIBS)
+
+$(BINDIR)/build_jacotin_pages: $(SRCDIR)/build_jacotin_pages.cpp 
+	$(CCC) $(CCFLAGS) -DDEFAULT_FOLDER=\"$(JACOTIN_FOLDER)\" $(SRCDIR)/build_jacotin_pages.cpp -o $(BINDIR)/build_jacotin_pages  $(LIBS)
+

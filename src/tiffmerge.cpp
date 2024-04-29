@@ -13,18 +13,45 @@ extern "C" {
 
 #define	CopyField(tag, v) \
     if (TIFFGetField(tifin, tag, &v)) TIFFSetField(tifout, tag, v)
+#define	CopyField2(tag, v1, v2) \
+    if (TIFFGetField(tifin, tag, &v1, &v2)) TIFFSetField(tifout, tag, v1, v2)
+#define	CopyField3(tag, v1, v2, v3) \
+    if (TIFFGetField(tifin, tag, &v1, &v2, &v3)) TIFFSetField(tifout, tag, v1, v2, v3)
+
+void emitCassiniInfo(TIFF* tifout) {
+    const char* description = "Carte Générale de la France";
+    const char* software = "";
+    const char* copyright = "©2024 Frédéric Delhoume delhoume@gmail.com";
+	const char* datetime = "2024:04:12 00:00:00";
+	const char* artist = "César-François Cassini";
+    TIFFSetField(tifout, TIFFTAG_IMAGEDESCRIPTION, description);
+    TIFFSetField(tifout, TIFFTAG_SOFTWARE, software);
+    TIFFSetField(tifout, TIFFTAG_COPYRIGHT, copyright);
+    TIFFSetField(tifout, TIFFTAG_DATETIME, datetime);  
+	TIFFSetField(tifout, TIFFTAG_ARTIST, artist);
+ 
+}
+
+
+void emitNormalInfo(TIFF* tifout) {
+   const char* description = "Carte Générale de la France";
+    const char* software = "Very Large Image Viewer";
+    const char* copyright = "©2024 Frédéric Delhoume delhoume@gmail.com";
+  TIFFSetField(tifout, TIFFTAG_IMAGEDESCRIPTION, description);
+    TIFFSetField(tifout, TIFFTAG_SOFTWARE, software);
+    TIFFSetField(tifout, TIFFTAG_COPYRIGHT, copyright);
+
+}
 
 
 int main(int argc, char* argv[]) {
 	TIFFSetWarningHandler(0);
- 
-    TIFF* tifout = TIFFOpen(argv[argc - 1], "w8");
-    const char* description = "";
-    const char* software = "Very Large Image Viewer";
-    const char* copyright = "Frederic Delhoume delhoume@gmail.com";
-    TIFFSetField(tifout, TIFFTAG_IMAGEDESCRIPTION, description);
-    TIFFSetField(tifout, TIFFTAG_SOFTWARE, software);
-    TIFFSetField(tifout, TIFFTAG_COPYRIGHT, copyright);
+	
+	TIFFOpenOptions *opts = TIFFOpenOptionsAlloc();
+	TIFFOpenOptionsSetMaxSingleMemAlloc(opts, 0);// unlimited
+    TIFF* tifout = TIFFOpenExt(argv[argc - 1], "w8", opts);
+	emitCassiniInfo(tifout);
+//	emitNormalInfo(tifout);
     std::cout << "Creating multiple image file..." << endl
 	 << "destination file: " << argv[argc - 1] << endl;
  	unsigned int fullresfirst = true;
@@ -36,17 +63,17 @@ int main(int argc, char* argv[]) {
     for (unsigned int idx = 1; idx < nimages; ++idx) {
       uint32_t imagewidth, imageheight;
       uint32_t tilewidth, tileheight;
-	  uint16_t bitspersample, samplesperpixel, compression, photometric, shortv;
+	  uint16_t bitspersample, samplesperpixel, compression, photometric, shortv, *shortav;
       unsigned int x, y;
       const char* current_file = argv[idx];
-      TIFF* tifin = TIFFOpen(argv[idx], "rm");
+      TIFF* tifin = TIFFOpenExt(argv[idx], "rm", opts);
 	  if (!tifin) {
 		std::cout << "failed to open current file: " << current_file << endl;
 		continue;
 	  }
-      tdata_t tilebuf = _TIFFmalloc(TIFFTileSize(tifin));
-      std::cout << "current file: " << current_file << " (tilesize: " << TIFFTileSize(tifin) << ")" << endl;
-	  
+        std::cout << "current file: " << current_file << " (tilesize: " << TIFFTileSize(tifin) << ")" << endl;
+   tdata_t tilebuf = _TIFFmalloc(TIFFTileSize(tifin) * 2);
+ 	  
 	CopyField(TIFFTAG_TILEWIDTH, tilewidth);
 	CopyField(TIFFTAG_TILELENGTH, tileheight);
 	CopyField(TIFFTAG_IMAGEWIDTH, imagewidth);
@@ -56,7 +83,7 @@ int main(int argc, char* argv[]) {
 	CopyField(TIFFTAG_COMPRESSION, compression);
 
     CopyField(TIFFTAG_PHOTOMETRIC, photometric);
-	CopyField(TIFFTAG_EXTRASAMPLES, shortv);
+	CopyField2(TIFFTAG_EXTRASAMPLES, shortv, shortav);
 	CopyField(TIFFTAG_PREDICTOR, shortv);
 	CopyField(TIFFTAG_THRESHHOLDING, shortv);
 	CopyField(TIFFTAG_FILLORDER, shortv);
@@ -65,13 +92,8 @@ int main(int argc, char* argv[]) {
 	CopyField(TIFFTAG_MAXSAMPLEVALUE, shortv);
 	CopyField(TIFFTAG_PLANARCONFIG, shortv);
 
-	if (samplesperpixel == 4 && photometric == PHOTOMETRIC_RGB) {
-		// transparency mask support
-		uint16_t sampleinfo[1]; 
-		// unassociated alpha data is transparency information
-		sampleinfo[0] = EXTRASAMPLE_UNASSALPHA;
-		TIFFSetField(tifout, TIFFTAG_EXTRASAMPLES, 1, sampleinfo);
-	 }
+	const ttile_t numtiles = TIFFNumberOfTiles(tifin);
+
 	unsigned int numtilesx = imagewidth / tilewidth;
 	if (imagewidth % tilewidth)
 		++numtilesx;
@@ -97,9 +119,11 @@ int main(int argc, char* argv[]) {
 		  case COMPRESSION_JPEG: {
 			  uint32_t count;
 			  void* table = NULL;
+			 TIFFSetField(tifout, TIFFTAG_JPEGTABLESMODE, 0);
 			  if (TIFFGetField(tifin, TIFFTAG_JPEGTABLES, &count, &table) && (count > 0) && table) {
 				TIFFSetField(tifout, TIFFTAG_JPEGTABLES, count, table);
 			  }
+
 			  std::cout << "jpeg compression" << endl;
 			  break;
 		  }
@@ -110,48 +134,27 @@ int main(int argc, char* argv[]) {
 		  break;
 	}
 
-#if 1
-	for (unsigned int y = 0; y < numtilesy; ++y) {
-		for (unsigned int x = 0; x < numtilesx; ++x) {
-			uint32_t tilenum = TIFFComputeTile(tifin, x * tilewidth, y * tileheight, 0, 0);
-		//	tsize_t numbytes = TIFFReadRawTile(tifin, tilenum, tilebuf, TIFFTileSize(tifin));
-			tsize_t numbytes = TIFFReadEncodedTile(tifin, tilenum, tilebuf, TIFFTileSize(tifin));
+	for (unsigned int tidx = 0; tidx < numtiles; ++tidx) {
+		//	tsize_t numbytes = TIFFReadRawTile(tifin, tidx, tilebuf, TIFFTileSize(tifin));
+			tsize_t numbytes = TIFFReadEncodedTile(tifin, tidx, tilebuf, TIFFTileSize(tifin));
 			if (numbytes == -1) 
 					std::cout << "Error for " << x << ":" << y << endl;
 			if (numbytes > TIFFTileSize(tifin))
-					std::cout << "Readbytes " << numbytes <<  " at " << x << "x" << y  << "is larger than " << TIFFTileSize(tifin) << endl;
-			tilenum = TIFFComputeTile(tifout, x * tilewidth, y * tileheight, 0, 0);
-			//TIFFWriteRawTile(tifout, tilenum, tilebuf, numbytes);
-			TIFFWriteEncodedTile(tifout, tilenum, tilebuf, numbytes);
+					std::cout << "Readbytes " << numbytes <<  " at " << tidx << " is larger than " << TIFFTileSize(tifin) << endl;
+//			TIFFWriteRawTile(tifout, tidx, tilebuf, numbytes);
+			TIFFWriteEncodedTile(tifout, tidx, tilebuf, numbytes);
+		if ((tidx > 0) && (tidx % numtilesx) == 0) {
+			std::cout << "   row " << ((tidx / numtilesy) + 1) << "/" << (numtiles / numtilesy) << "                \r" ;
+			std::cout.flush();
 		}
-		std::cout << "   row " << (y + 1) << "/" << numtilesy << "                \r" ;
-		std::cout.flush();
 	}
-#else
-	unsigned int current_row = 0;
-	unsigned int numrows = imageheight / tileheight;
-	if (imageheight % tileheight) numrows++;
-      for(y = 0; y < imageheight; y += tileheight, current_row++) {
-		  std::cout << "   row " << (current_row + 1) << "/" << numrows << "                \r" ;
-		  std::cout.flush();
-		  for (x = 0; x < imagewidth; x += tilewidth) {
-			  tsize_t numbytes = TIFFReadRawTile(tifin, 
-							 TIFFComputeTile(tifin, x, y, 0, 0), 
-							 tilebuf, 
-							 TIFFTileSize(tifin));
-			if (numbytes == -1) 
-  					std::cout << "Error for " << x << ":" << y << endl;
-			if (numbytes > TIFFTileSize(tifin))
-					std::cout << "Readbytes " << numbytes <<  " at " << x << "x" << y  << "is larger than " << TIFFTileSize(tifin) << endl;
-			  TIFFWriteRawTile(tifout, TIFFComputeTile(tifout, x, y, 0, 0), tilebuf, numbytes);
-		  }
-      }
-#endif
+
       TIFFWriteDirectory(tifout);
       TIFFClose(tifin);
       _TIFFfree(tilebuf);    
 	}    
 	TIFFClose(tifout);
+	TIFFOpenOptionsFree(opts);
     std::cout << endl << "Done" << endl;
 	return 0;
 }
