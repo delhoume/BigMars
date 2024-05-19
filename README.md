@@ -177,16 +177,12 @@ The final pyramidal TIFF should weight no more than **1.33 times the full size i
 Once this is done, you may want to build the real deal, the full Mars surface image with
 ```bin/buildmarsimagetiled mars_90_44_tiled.tif 90 44```
 
-Brace yourself, it will be days (week) long and will take a huge amount of disk space.
+Brace yourself, it will be days long and will take a large amount of disk space.
 
-I have yet to finish a complete build, so far it is running for 4 days and estimated remaining time is 1 day.
-Final running  time is notoriously hard to predict (just think about a Windows copy dialog with a large number of various sized files,
-the estimation for completion can vary very much).
-
-Once you have the full 90x44 ```mars_90_44_tiled.tif``` you follow the same process than for the smaller ones,generating sublevels, merging.
+Once you have the full 90x44 ```mars_90_44_tiled.tif``` you follow the same process than for the smaller ones, generating sublevels, merging.
 Processing time will be significantly higher as the full image is about 40 times larger...
 
-The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8840x4076 **512x512 tiles**, takes about 1 Terabyte on disk,
+The final **42678000x2086480 pixels** for the full resolution TIFF is divided into **8336x4076 **512x512 tiles**, takes about 1.5 Terabyte on disk,
 with JPEG tile compression and yet **can be instantly opened in Vliv**
 
 **Please notify me if you got this far !**
@@ -234,7 +230,7 @@ For more information on DeepZoom, a very good source is OpenSeaDragon Github, an
 
 ## Step 6 Deploy the image with only 4 files
 
-You do not need to create the very large Deep Zoom structure on disk to visualize your image, you can directly use the pyramidal T
+You do not need to create the very large Deep Zoom structure on disk to visualize your image, you can directly use the pyramidal
 TIFF files as the source for the tiles.
 
 All you need are:
