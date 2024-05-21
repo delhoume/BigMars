@@ -2,7 +2,7 @@ This project is a guide for creating a **single TIFF file** (**42678000 x 208648
 
 It is incredibly easy thanks to custom code.
 
-The final TIFF image weights about 1 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
+The final TIFF image weights about 1.5 Terabyte, JPEG compressed (much more if Deflate is used), includes pre-computed sublevels and is tiled to allow even modest computers
 to be able to view (zoom, unzoom, pan).
 
 This specially crafted pyramidal tiled TIFF can be opened with my Open Source software for Windows https://github.com/delhoume/vliv .
