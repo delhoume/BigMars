@@ -116,7 +116,7 @@ because they must be fully loaded even if only a smart part  is visible on-scree
 
 **open center.tif in Vliv** you can pan as you want very smoothly in this already large image. **Celebrate !**
 It is expected you cannot zoom out yet...
-You can also generate a pyramidal TIFF to dislay in Vliv or in a local browser using **khufu** (see below step 6)
+You can also generate a pyramidal TIFF to display in Vliv or in a local browser using **khufu** (see below step 6)
 
 You can try ```bin/strip2iled.zip``` that will create a lossless but much larger file.
 
