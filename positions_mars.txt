@@ -1,0 +1,39 @@
+Mars 2: 45 S, 313 W (NSSDC)  y = 0.75
+Mars 3: 45 S, 158 W (TPS) x = 0.061 y = 0.75
+Mars 6: 23.90 S, 19.42 W (TPS) -> x = 0.392 y = 0.65
+Viking 1: 22.48 N, 49.97 W (NSSDC) ->  (22.48 / 90) + 0.5, (-49.97 / 180) + 0.5,  x = 0.222 y = 0.25
+Mars Polar Lander: 76.57S, 165.2 E (read from map provided by HiRISE team)
+Pathfinder: 19.33 N, 33.55 W (NSSDC) -> (19.33 / 90) + 0.5, (-33.55 / 180) + 0.5 -> x = 0.3136 y = 0.285
+Beagle 2: 10.6 N, 270 W (NSSDC)
+Spirit: 14.571892 S, 175.47848 E(Arvidson et al, JGR, 2006) x = 0.9874 y = 0.3309
+Opportunity: 1.9462 S, 354.4734 E (Squyres et al, JGR, 2006)  x = 0.4692  y 0.5126
+Phoenix: 68.218830 N, 234.250778 E (via press briefing)
+Curiosity: 4.5895 S, 137.4417 E (Vasavada et al, JGR, 2014)
+InSight: 4.502 N, 135.623 E (Golombek et al., LPSC, 2019)
+ExoMars Schiaparelli: Near the Opportunity landing site.
+ExoMars rover: 18.1N, 335.7E (read off this map from ESA, 2018)
+Mars 2020 rover: 77.5945 E, 18.3628 N (landing site workshop) perseverance 18.447°N 77.402°E
+
+equirectangular
+long -pi pi -> 0 1
+lat -pi/2 pi/2 -> 0 1
+
+uw = 0.5 - long / 360
+ue = 0.5 + long / 360
+
+un = 0.5 - lat / 180
+us = 0.5 + lat / 180;
+
+
+Viking1
+https://geohack.toolforge.org/geohack.php?pagename=Viking_1&params=22.27_N_312.05_E_globe:Mars&title=Viking+1+lander
+https://geohack.toolforge.org/geohack.php?&params=0_N_0_E_globe:Mars&title=ZeroZero
+
+UV coordinates
+viking1 x = 0.222 y = 0.25
+pathfinder: x = 0.3136 y = 0.285
+mars2 : x = 0.238  y 0.75
+mars3: x = .0611 y = 0.75
+mars6 x = 0.393 y = .65
+opportunity: x = 0.3469 x = 0.5126
+spirit: x = 0.9874 y = 0.662
