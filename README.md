@@ -29,7 +29,7 @@ I use a 2020 Mac Mini M1, but source code and scripts can be easily adapted or c
 You can stop at any moment and downloading will resume when you relaunch it.
 The download is split in 4 parts because I did not find how to create a single cUrl command for the files pattern.
 
-Files are named using longitudes from -180 to 176  and latitudes from -88 to 84 in 4 increment
+Files are named using longitudes from -180 to 176  and latitudes from -88 to 84 in 4 degree increment
 
 ```
 >curl -C -   "https://murray-lab.caltech.edu/CTX/V01/tiles/MurrayLab_GlobalCTXMosaic_V01_E[000-176:4]_N[00-84:4].zip" -O
